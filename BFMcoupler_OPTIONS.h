@@ -1,7 +1,7 @@
-C $Header: /pkg/BFMcouler/BFMcoupler_OPTIONS.h,v 1.01 2014/04/24
+C BFMcouler/BFMcoupler_OPTIONS.h, v 1.0
 C -----------------------------------------------------------------------------
 
-C Copyright (C) 2016 Gianpiero Cossarini (gcossarini@inogs.it)
+C Copyright (C) 2017 Gianpiero Cossarini (gcossarini@inogs.it)
 
 C This program is free software; you can redistribute it and/or modify it
 C under the terms of the GNU General Public License as published by the Free
