@@ -1,20 +1,6 @@
 C $Header: /u/gcmpack/MITgcm/pkg/gchem/gchem_readparms.F,v 1.19 2011/12/22 19:05:27 jmc Exp $
 C $Name:  $
-C -----------------------------------------------------------------------------
 
-C Copyright (C) 2016 Gianpiero Cossarini (gcossarini@inogs.it)
-
-C This program is free software; you can redistribute it and/or modify it
-C under the terms of the GNU General Public License as published by the Free
-C Software Foundation; either version 3 of the License, or (at your option)
-C any later version.
-C
-C This program is distributed in the hope that it will be useful,
-C but WITHOUT ANY WARRANTY; without even the implied warranty of
-C MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-C GNU General Public License for more details.
-
-C -----------------------------------------------------------------------------
 
 #include "GCHEM_OPTIONS.h"
 
@@ -26,6 +12,9 @@ C !INTERFACE: ==========================================================
 
 C !DESCRIPTION:
 C     Initialize GCHEM parameters, read in data.gchem
+
+C  This routine has been modified to use the BFM library through
+C  the BFMCOUPLER package in Jan 2017 for to by G.Cossarini (gcossari@inogs.it)
 
 C !USES: ===============================================================
       IMPLICIT NONE
