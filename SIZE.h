@@ -1,5 +1,20 @@
 C $Header: /u/gcmpack/MITgcm/model/inc/SIZE.h,v 1.28 2009/05/17 21:15:07 jmc Exp $
 C $Name:  $
+C -----------------------------------------------------------------------------
+
+C Copyright (C) 2016 Gianpiero Cossarini (gcossarini@inogs.it)
+
+C This program is free software; you can redistribute it and/or modify it
+C under the terms of the GNU General Public License as published by the Free
+C Software Foundation; either version 3 of the License, or (at your option)
+C any later version.
+C
+C This program is distributed in the hope that it will be useful,
+C but WITHOUT ANY WARRANTY; without even the implied warranty of
+C MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+C GNU General Public License for more details.
+
+C -----------------------------------------------------------------------------
 C
 C  These lines are here to deliberately cause a compile-time error.
 C  If you see these lines in your .F files or the compiler shows them
