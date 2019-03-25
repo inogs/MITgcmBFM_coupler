@@ -1,19 +1,6 @@
-C BFMcoupler/BFMcoupler_readparms.F,v 1.0
-C -----------------------------------------------------------------------------
-
-C Copyright (C) 2017 Gianpiero Cossarini (gcossarini@inogs.it)
-
-C This program is free software; you can redistribute it and/or modify it
-C under the terms of the GNU General Public License as published by the Free
-C Software Foundation; either version 3 of the License, or (at your option)
-C any later version.
-C
-C This program is distributed in the hope that it will be useful,
-C but WITHOUT ANY WARRANTY; without even the implied warranty of
-C MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-C GNU General Public License for more details.
-
-C -----------------------------------------------------------------------------
+C $Header: /MITgcm/pkg/BFMcoupler/BFMcoupler_readparms.F,v 1.1 2014/04/09
+C $Name:  Gianpiero Cossaini
+C modified 15 feb by Valeria
 
 #include "BFMcoupler_OPTIONS.h"
 CBOP
@@ -63,16 +50,25 @@ C     iUnit     :: Work variable for IO unit number
 
      &          ,BFMcoupler_sparFile
 
-     &          ,BFMcoupler_N1pDepFile,BFMcoupler_N3nDepFile,
-     &          BFMcoupler_forcingPeriod, BFMcoupler_forcingCycle
+     &          ,BFMcoupler_N1pSurfForcFile,BFMcoupler_N3nSurfForcFile,
+     &          BFMcoupler_forcingPeriod, BFMcoupler_forcingCycle,
+     &          BFMcoupler_N5sSurfForcFile,BFMcoupler_O3cSurfForcFile,
+     &          BFMcoupler_O3hSurfForcFile,BFMcoupler_N1pBotForcFile, 
+     &          BFMcoupler_N3nBotForcFile,BFMcoupler_N4nBotForcFile,
+     &          BFMcoupler_O2oBotForcFile,BFMcoupler_O3cBotForcFile,
+     &          BFMcoupler_O3hBotForcFile,BFMcoupler_CG01BotForcFile,
+     &          BFMcoupler_CG02BotForcFile, BFMcoupler_CG03BotForcFile, 
+     &          BFMcoupler_CG04BotForcFile, BFMcoupler_CG05BotForcFile,
+     &          BFMcoupler_CG06BotForcFile, BFMcoupler_CG07BotForcFile,
+     &          BFMcoupler_CG08BotForcFile, BFMcoupler_CG09BotForcFile,
+     &          BFMcoupler_CG10BotForcFile, BFMcoupler_CG11BotForcFile,
+     &          BFMcoupler_CG12BotForcFile
 #ifdef USE_SINK
      &          ,vsed
 #endif
 #ifdef USE_SHADE
      &          ,p_espP1,p_espP2,p_espP3,p_espP4,p_espWATER  
 #endif
-     &          ,p_burial,p_fluxC_bot,p_fluxN_bot
-     &          ,p_fluxP_bot,p_fluxSi_bot
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
@@ -82,8 +78,29 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
        BFMcoupler_PCO2File  = ' '
        BFMcoupler_xESPFile  = ' '
        BFMcoupler_sparFile  = ' '
-       BFMcoupler_N1pDepFile= ' '
-       BFMcoupler_N3nDepFile= ' '
+       BFMcoupler_N1pSurfForcFile= ' '
+       BFMcoupler_N3nSurfForcFile= ' '
+       BFMcoupler_N5sSurfForcFile= ' '
+       BFMcoupler_O3cSurfForcFile= ' '
+       BFMcoupler_O3hSurfForcFile= ' '
+       BFMcoupler_N1pBotForcFile= ' '
+       BFMcoupler_N3nBotForcFile= ' '
+       BFMcoupler_N4nBotForcFile= ' '
+       BFMcoupler_O2oBotForcFile= ' '
+       BFMcoupler_O3cBotForcFile= ' '
+       BFMcoupler_O3hBotForcFile= ' '
+       BFMcoupler_CG01BotForcFile= ' '
+       BFMcoupler_CG02BotForcFile= ' '
+       BFMcoupler_CG03BotForcFile= ' '
+       BFMcoupler_CG04BotForcFile= ' '
+       BFMcoupler_CG05BotForcFile= ' '
+       BFMcoupler_CG06BotForcFile= ' '
+       BFMcoupler_CG07BotForcFile= ' '
+       BFMcoupler_CG08BotForcFile= ' '
+       BFMcoupler_CG09BotForcFile= ' '
+       BFMcoupler_CG10BotForcFile= ' '
+       BFMcoupler_CG11BotForcFile= ' '
+       BFMcoupler_CG12BotForcFile= ' '
        BFMcoupler_forcingPeriod = externForcingPeriod
        BFMcoupler_forcingCycle  = externForcingCycle
 #ifdef USE_SINK
@@ -96,12 +113,6 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
        p_espP4=8.0E-3 ! [m2 mgCHL-1] use default if not present in NAMELIST
        p_espWATER=0.035 ! [m-1] use default if not present in NAMELIST
 #endif
-
-       p_burial=0.0001 ! [1/s] use default if not present in NAMELIST
-       p_fluxC_bot=0.0 ! [mmol/m3/s] set to ZERO if not present in NAMELIST
-       p_fluxN_bot=0.0 ! [mmol/m3/s] set to ZERO if not present in NAMELIST
-       p_fluxP_bot=0.0 ! [mmol/m3/s] set to ZERO if not present in NAMELIST
-       p_fluxSi_bot=0.0 ! [mmol/m3/s] set to ZERO if not present in NAMELIST
 
       WRITE(msgBuf,'(A)')'BFMcoupler_READPARMS:check on light use: '
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,

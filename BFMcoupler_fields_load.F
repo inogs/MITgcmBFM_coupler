@@ -1,20 +1,6 @@
-C BFMcoupler/BFMcoupler_fields_load.F, v 1.0
-C -----------------------------------------------------------------------------
-
-C Copyright (C) 2017 Gianpiero Cossarini (gcossarini@inogs.it)
-
-C This program is free software; you can redistribute it and/or modify it
-C under the terms of the GNU General Public License as published by the Free
-C Software Foundation; either version 3 of the License, or (at your option)
-C any later version.
-C
-C This program is distributed in the hope that it will be useful,
-C but WITHOUT ANY WARRANTY; without even the implied warranty of
-C MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-C GNU General Public License for more details.
-
-C -----------------------------------------------------------------------------
-
+C $Header: /MITgcm/pkg/BFMcoupler/BFMcoupler_fields_load.F,v 1.01
+C 2014/04/10
+C modified 15 feb 2018 by Valeria
 #include "BFMcoupler_OPTIONS.h"
 
 CBOP
@@ -25,9 +11,11 @@ C !INTERFACE: ==========================================================
      I           myIter,myTime,myThid)
 
 C !DESCRIPTION:
-C  Read, if necessary, AtmosPCO2, AtmosP, spar, xESP, N1p_dep
-C  and N3n_dep
-
+C  Read, if necessary, AtmosPCO2, AtmosP, spar, xESP, N1p_surfF
+C  and N3n_surfF
+C  FIXME : and N5s_surfF, O3c_surfF, O3h_surfF 
+C  FIXME: and N1p_botF, N3n_botF, N4n_botF,O2o_botF, O3c_botF, O3h_botF
+C  FIXME: and CG01_botF,..., CG12_botF  
 C !USES: ===============================================================
       IMPLICIT NONE
 #include "SIZE.h"
@@ -119,18 +107,144 @@ C     data for the period ahead and the period behind myTime.
         CALL READ_REC_XY_RS(BFMcoupler_PCO2File,AtmosPCO21,intime1,
      &        myIter,myThid )
         ENDIF
-        IF ( BFMcoupler_N1pDepFile .NE. ' '  ) THEN
-         CALL READ_REC_XY_RS(BFMcoupler_N1pDepFile,N1p_dep0,intime0,
-     &       myIter,myThid )
-         CALL READ_REC_XY_RS(BFMcoupler_N1pDepFile,N1p_dep1,intime1,
-     &       myIter,myThid )
+        IF ( BFMcoupler_N1pSurfForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_N1pSurfForcFile,N1p_surfF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_N1pSurfForcFile,N1p_surfF1,
+     &       intime1,myIter,myThid )
         ENDIF
-        IF ( BFMcoupler_N3nDepFile .NE. ' '  ) THEN
-         CALL READ_REC_XY_RS(BFMcoupler_N3nDepFile,N3n_dep0,intime0,
-     &       myIter,myThid )
-         CALL READ_REC_XY_RS(BFMcoupler_N3nDepFile,N3n_dep1,intime1,
-     &       myIter,myThid )
-         ENDIF
+        IF ( BFMcoupler_N3nSurfForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_N3nSurfForcFile,N3n_surfF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_N3nSurfForcFile,N3n_surfF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_N5sSurfForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_N5sSurfForcFile,N5s_surfF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_N5sSurfForcFile,N5s_surfF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_O3cSurfForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_O3cSurfForcFile,O3c_surfF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_O3cSurfForcFile,O3c_surfF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_O3hSurfForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_O3hSurfForcFile,O3h_surfF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_O3hSurfForcFile,O3h_surfF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_N1pBotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_N1pBotForcFile,N1p_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_N1pBotForcFile,N1p_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_N3nBotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_N3nBotForcFile,N3n_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_N3nBotForcFile,N3n_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_N4nBotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_N4nBotForcFile,N4n_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_N4nBotForcFile,N4n_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_O2oBotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_O2oBotForcFile,O2o_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_O2oBotForcFile,O2o_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_O3cBotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_O3cBotForcFile,O3c_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_O3cBotForcFile,O3c_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_O3hBotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_O3hBotForcFile,O3h_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_O3hBotForcFile,O3h_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG01BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG01BotForcFile,CG01_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG01BotForcFile,CG01_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG02BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG02BotForcFile,CG02_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG02BotForcFile,CG02_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG03BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG03BotForcFile,CG03_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG03BotForcFile,CG03_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG04BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG04BotForcFile,CG04_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG04BotForcFile,CG04_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG05BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG05BotForcFile,CG05_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG05BotForcFile,CG05_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG06BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG06BotForcFile,CG06_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG06BotForcFile,CG06_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG07BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG07BotForcFile,CG07_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG07BotForcFile,CG07_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG08BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG08BotForcFile,CG08_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG08BotForcFile,CG08_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG09BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG09BotForcFile,CG09_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG09BotForcFile,CG09_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG10BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG10BotForcFile,CG10_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG10BotForcFile,CG10_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG11BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG11BotForcFile,CG11_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG11BotForcFile,CG11_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CG12BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CG12BotForcFile,CG12_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CG12BotForcFile,CG12_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
 #ifdef READ_xESP
         IF ( BFMcoupler_xESPFile .NE. ' '  ) THEN
          CALL READ_REC_XY_RS(BFMcoupler_xESPFile,xESP0,intime0,
@@ -153,10 +267,52 @@ C--   fill-in overlap after loading temp arrays:
         _EXCH_XY_RS(AtmosP1, myThid )
         _EXCH_XY_RS(AtmosPCO20, myThid )
         _EXCH_XY_RS(AtmosPCO21, myThid )
-        _EXCH_XY_RS(N1p_dep0, myThid )
-        _EXCH_XY_RS(N1p_dep1, myThid )
-        _EXCH_XY_RS(N3n_dep0, myThid )
-        _EXCH_XY_RS(N3n_dep1, myThid )
+        _EXCH_XY_RS(N1p_surfF0, myThid )
+        _EXCH_XY_RS(N1p_surfF1, myThid )
+        _EXCH_XY_RS(N3n_surfF0, myThid )
+        _EXCH_XY_RS(N3n_surfF1, myThid )
+        _EXCH_XY_RS(N5s_surfF0, myThid )
+        _EXCH_XY_RS(N5s_surfF1, myThid )
+        _EXCH_XY_RS(O3c_surfF0, myThid )
+        _EXCH_XY_RS(O3c_surfF1, myThid )
+        _EXCH_XY_RS(O3h_surfF0, myThid )
+        _EXCH_XY_RS(O3h_surfF1, myThid )
+        _EXCH_XY_RS(N1p_botF0, myThid )
+        _EXCH_XY_RS(N1p_botF1, myThid )
+        _EXCH_XY_RS(N3n_botF0, myThid )
+        _EXCH_XY_RS(N3n_botF1, myThid )
+        _EXCH_XY_RS(N4n_botF0, myThid )
+        _EXCH_XY_RS(N4n_botF1, myThid )
+        _EXCH_XY_RS(O2o_botF0, myThid )
+        _EXCH_XY_RS(O2o_botF1, myThid )
+        _EXCH_XY_RS(O3c_botF0, myThid )
+        _EXCH_XY_RS(O3c_botF1, myThid )
+        _EXCH_XY_RS(O3h_botF0, myThid )
+        _EXCH_XY_RS(O3h_botF1, myThid )
+        _EXCH_XY_RS(CG01_botF0, myThid )
+        _EXCH_XY_RS(CG01_botF1, myThid )
+        _EXCH_XY_RS(CG02_botF0, myThid )
+        _EXCH_XY_RS(CG02_botF1, myThid )
+        _EXCH_XY_RS(CG03_botF0, myThid )
+        _EXCH_XY_RS(CG03_botF1, myThid )
+        _EXCH_XY_RS(CG04_botF0, myThid )
+        _EXCH_XY_RS(CG04_botF1, myThid )
+        _EXCH_XY_RS(CG05_botF0, myThid )
+        _EXCH_XY_RS(CG05_botF1, myThid )
+        _EXCH_XY_RS(CG06_botF0, myThid )
+        _EXCH_XY_RS(CG06_botF1, myThid )
+        _EXCH_XY_RS(CG07_botF0, myThid )
+        _EXCH_XY_RS(CG07_botF1, myThid )
+        _EXCH_XY_RS(CG08_botF0, myThid )
+        _EXCH_XY_RS(CG08_botF1, myThid )
+        _EXCH_XY_RS(CG09_botF0, myThid )
+        _EXCH_XY_RS(CG09_botF1, myThid )
+        _EXCH_XY_RS(CG10_botF0, myThid )
+        _EXCH_XY_RS(CG10_botF1, myThid )
+        _EXCH_XY_RS(CG11_botF0, myThid )
+        _EXCH_XY_RS(CG11_botF1, myThid )
+        _EXCH_XY_RS(CG12_botF0, myThid )
+        _EXCH_XY_RS(CG12_botF1, myThid )
 #ifdef READ_xESP
         _EXCH_XY_RS(xESP0, myThid )
         _EXCH_XY_RS(xESP1, myThid )
@@ -215,23 +371,190 @@ C------------------------------------------
            ENDDO
          ENDIF
 #endif
-         IF ( BFMcoupler_N1pDepFile.NE. ' '  ) THEN
+         IF ( BFMcoupler_N1pSurfForcFile.NE. ' '  ) THEN
            DO j=1-OLy,sNy+OLy
             DO i=1-OLx,sNx+OLx
-             N1p_dep(i,j,bi,bj) = bWght*N1p_dep0(i,j,bi,bj)
-     &                          + aWght*N1p_dep1(i,j,bi,bj)
+             N1p_surfF(i,j,bi,bj) = bWght*N1p_surfF0(i,j,bi,bj)
+     &                          + aWght*N1p_surfF1(i,j,bi,bj)
             ENDDO
            ENDDO
          ENDIF
-         IF ( BFMcoupler_N3nDepFile.NE. ' '  ) THEN
+         IF ( BFMcoupler_N3nSurfForcFile.NE. ' '  ) THEN
            DO j=1-OLy,sNy+OLy
             DO i=1-OLx,sNx+OLx
-             N3n_dep(i,j,bi,bj) = bWght*N3n_dep0(i,j,bi,bj)
-     &                          + aWght*N3n_dep1(i,j,bi,bj)
+             N3n_surfF(i,j,bi,bj) = bWght*N3n_surfF0(i,j,bi,bj)
+     &                          + aWght*N3n_surfF1(i,j,bi,bj)
             ENDDO
            ENDDO
          ENDIF
-
+         IF ( BFMcoupler_N5sSurfForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             N5s_surfF(i,j,bi,bj) = bWght*N5s_surfF0(i,j,bi,bj)
+     &                          + aWght*N5s_surfF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_O3cSurfForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             O3c_surfF(i,j,bi,bj) = bWght*O3c_surfF0(i,j,bi,bj)
+     &                          + aWght*O3c_surfF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_O3hSurfForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             O3h_surfF(i,j,bi,bj) = bWght*O3h_surfF0(i,j,bi,bj)
+     &                          + aWght*O3h_surfF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_N1pBotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             N1p_botF(i,j,bi,bj) = bWght*N1p_botF0(i,j,bi,bj)
+     &                          + aWght*N1p_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_N3nBotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             N3n_botF(i,j,bi,bj) = bWght*N3n_botF0(i,j,bi,bj)
+     &                          + aWght*N3n_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_N4nBotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             N4n_botF(i,j,bi,bj) = bWght*N4n_botF0(i,j,bi,bj)
+     &                          + aWght*N4n_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_O2oBotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             O2o_botF(i,j,bi,bj) = bWght*O2o_botF0(i,j,bi,bj)
+     &                          + aWght*O2o_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_O3cBotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             O3c_botF(i,j,bi,bj) = bWght*O3c_botF0(i,j,bi,bj)
+     &                          + aWght*O3c_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_O3hBotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             O3h_botF(i,j,bi,bj) = bWght*O3h_botF0(i,j,bi,bj)
+     &                          + aWght*O3h_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG01BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG01_botF(i,j,bi,bj) = bWght*CG01_botF0(i,j,bi,bj)
+     &                          + aWght*CG01_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG02BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG02_botF(i,j,bi,bj) = bWght*CG02_botF0(i,j,bi,bj)
+     &                          + aWght*CG02_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG03BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG03_botF(i,j,bi,bj) = bWght*CG03_botF0(i,j,bi,bj)
+     &                          + aWght*CG03_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG04BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG04_botF(i,j,bi,bj) = bWght*CG04_botF0(i,j,bi,bj)
+     &                          + aWght*CG04_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG05BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG05_botF(i,j,bi,bj) = bWght*CG05_botF0(i,j,bi,bj)
+     &                          + aWght*CG05_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG06BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG06_botF(i,j,bi,bj) = bWght*CG06_botF0(i,j,bi,bj)
+     &                          + aWght*CG06_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG07BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG07_botF(i,j,bi,bj) = bWght*CG07_botF0(i,j,bi,bj)
+     &                          + aWght*CG07_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG08BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG08_botF(i,j,bi,bj) = bWght*CG08_botF0(i,j,bi,bj)
+     &                          + aWght*CG08_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG09BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG09_botF(i,j,bi,bj) = bWght*CG09_botF0(i,j,bi,bj)
+     &                          + aWght*CG09_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG10BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG10_botF(i,j,bi,bj) = bWght*CG10_botF0(i,j,bi,bj)
+     &                          + aWght*CG10_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG11BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG11_botF(i,j,bi,bj) = bWght*CG11_botF0(i,j,bi,bj)
+     &                          + aWght*CG11_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CG12BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CG12_botF(i,j,bi,bj) = bWght*CG12_botF0(i,j,bi,bj)
+     &                          + aWght*CG12_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
         ENDDO
        ENDDO
 

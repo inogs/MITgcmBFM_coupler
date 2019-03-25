@@ -1,21 +1,9 @@
-C BFMcoupler/BFMcoupler_calc_tendency.F, v 1.0
-
-C -----------------------------------------------------------------------------
-
-C Copyright (C) 2017 Gianpiero Cossarini (gcossarini@inogs.it)
-
-C This program is free software; you can redistribute it and/or modify it
-C under the terms of the GNU General Public License as published by the Free
-C Software Foundation; either version 3 of the License, or (at your option)
-C any later version.
-C
-C This program is distributed in the hope that it will be useful,
-C but WITHOUT ANY WARRANTY; without even the implied warranty of
-C MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-C GNU General Public License for more details.
-
-C -----------------------------------------------------------------------------
-
+C $Header: MITgcm/pkg/BFMcoupler/BFMcoupler_calc_tendency.F,v 1.01
+C 2014/04/10  cgp
+C modified 4 sept 2015 by Valeria, introducing N1p, N3n, N5s, O3c, O3h
+C contribution by rivers
+C in sept 2017 for the bottom contributions
+C in feb 2019 for the daily PAR modulation
 CBOP
 C !ROUTINE: BFMcoupler_calc_tendency
 
@@ -41,7 +29,7 @@ C !USES: ===============================================================
 #include "EEPARAMS.h"
 #include "PARAMS.h"
 #include "GRID.h"
-#include "BFMcoupler_VARS.h"
+#include "BFMcoupler_VARS.h" ! contains #include "BFM_var_list.h"
 #include "PTRACERS_SIZE.h"
 #include "PTRACERS_PARAMS.h"
 #include "PTRACERS_FIELDS.h"
@@ -77,18 +65,27 @@ C     === Local variables ====
        _RL Fsink(21,Nr)
 #endif /* USE_SINK */
        INTEGER i,j,k,jtr,ktmp,iv
-       _RL a(jptra),er(10),b(jptra),c(4),d(jptra_dia)
+       _RL a(jptra),er(10),b(jptra),c(4),d(jptra_dia),d2(1)
+C      _RS AtmosWIND0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy) 
        logical bot,sur
-
+       INTEGER kBot(1-OLx:sNx+OLx,1-OLy:sNy+OLy), kB
 C     msgBuf    :: Informational/error message buffer
       CHARACTER*(MAX_LEN_MBUF) msgBuf
       INTEGER stdUnit
+
+C     == routine arguments ==
+       INTEGER mydate(4)
+       INTEGER mydateday(4)
+C     == local variables ==
+       INTEGER mydate0(4)
+       _RL     daysecs
+       double precision POSITIVE_VALUE
+
 C ==== LOCAL VARIABLE FOR DIAGNOSTICS ====
 #ifdef ALLOW_DIAGNOSTICS
 #include "BFMcoupler_VARDIAGlocal.h"
 #endif /* ALLOW_DIAGNOSTICS */
 
-c
 
 CEOP
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
@@ -103,6 +100,19 @@ c initialized variable for diagnostics
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
+c initialization of kBot 
+
+c      DO bj = myByLo(myThid), myByHi(myThid)
+c       DO bi = myBxLo(myThid), myBxHi(myThid)
+        DO j=jmin,jmax
+         DO i=imin,imax
+             kBot(i,j)   = 1
+         ENDDO
+        ENDDO
+c       ENDDO
+c      ENDDO
+
+
 c compute par using QSW or PAR read from files or spar already
 c initialized in BFMcoupler_ini_forcing.F
        parconv= 1. _d 0/0.2174 _d 0  !conversion from W/m2 to uEin/m2/s
@@ -113,7 +123,7 @@ c initialized in BFMcoupler_ini_forcing.F
 #ifdef READ_PAR
         ligth(i,j)=spar(i,j,bi,bj)*maskC(i,j,1,bi,bj)
 #elif (defined USE_QSW)
-# ifdef ALLOW_LONGSTEP    
+#ifdef ALLOW_LONGSTEP    
         ligth(i,j)=-LS_Qsw(i,j,bi,bj)*parconv*parfrac*maskC(i,j,1,bi,bj)
 #else
         ligth(i,j)=-Qsw(i,j,bi,bj)*parconv*parfrac*maskC(i,j,1,bi,bj)
@@ -124,6 +134,22 @@ c    spar already initialized in BFMcouple_ini_forcing.F at 250 uEin/m2/s
 #endif
        ENDDO
       ENDDO
+
+c For day-night cycle
+c First call to extract the date array
+c mydate: yyyymmdd,hhmmss,leap_year,dayOfWeek
+       CALL cal_getdate(myIter,myTime,mydate,myThid)
+c Then computation of the day time in seconds: daysecs
+       mydate0=mydate
+       mydate0(2)=0
+       mydateday=mydate-mydate0
+       mydateday(3)=0   
+       mydateday(4)=-1 
+       CALL cal_toseconds(mydateday,daysecs,myThid)
+c Cosine modulation
+       POSITIVE_VALUE=cos(2*PI*DBLE(daysecs)/86400.-PI)
+
+
 c atten coeff read from file xESP, or computed as shelf shading of chla
       DO j=jmin,jmax
        DO i=imin,imax
@@ -155,10 +181,10 @@ c atten coeff read from file xESP, or computed as shelf shading of chla
 #else 
      &   p_espWATER
 #endif
-     &   + p_espP1*pTracer(i,j,k-1,bi,bj,14) ! P1i diatom
-     &   + p_espP2*pTracer(i,j,k-1,bi,bj,19) ! P2i flag
-     &   + p_espP3*pTracer(i,j,k-1,bi,bj,23) ! P3i picopl
-     &   + p_espP4*pTracer(i,j,k-1,bi,bj,27) ! P4i dinofl
+     &   + p_espP1*pTracer(i,j,k-1,bi,bj,14) ! P1l diatom
+     &   + p_espP2*pTracer(i,j,k-1,bi,bj,19) ! P2l flag
+     &   + p_espP3*pTracer(i,j,k-1,bi,bj,23) ! P3l picopl
+     &   + p_espP4*pTracer(i,j,k-1,bi,bj,27) ! P4l dinofl
 #elif (defined (READ_xESP))
      &     xESP(i,j,bi,bj)
 #else
@@ -166,12 +192,24 @@ c atten coeff read from file xESP, or computed as shelf shading of chla
 #endif
      &    )*.5 _d 0 *drF(k-1)
                 endif
+
+#ifdef USE_CYCLE
+#ifdef READ_PAR
+                xpar(i,j,k,bi,bj)=(max(1.0d-3,
+     & PI*POSITIVE_VALUE*ligth(i,j)))*exp(-atten)
+#else 
                 xpar(i,j,k,bi,bj)=ligth(i,j)*exp(-atten)
+#endif
+#else 
+                xpar(i,j,k,bi,bj)=ligth(i,j)*exp(-atten)
+#endif
              ENDDO
           ENDDO
          ENDDO
 
                 
+c      DO j=1-OLy,sNy+OLy
+c      DO i=1-OLx,sNx+OLx
       DO k=1,Nr
       DO j=jmin,jmax
       DO i=imin,imax
@@ -197,6 +235,7 @@ c set bot=1.0 if the layer below is not ocean
              ktmp=min(nR,k+1)
              if(hFacC(i,j,ktmp,bi,bj).eq.0. _d 0.or.k.eq.Nr) then
                bot =.TRUE.
+               kBot(i,j)=ktmp-1
              else
                bot =.FALSE.
              endif
@@ -218,7 +257,7 @@ c set sur = 1.0 if the layer is equal 1 (the land is already checked)
              er(3)  = rhoConst + rhoInSitu(i,j,k,bi,bj) ! rhoInSitu (density anomaly [kg/m^3] at cell center level) +
                                                         ! + RhoConst (set equal to rhoNil=999.8 (set_defaults.F and Ini_parms.F))
 #endif /* ALLOW_LONGSTEP  */
-             er(4)  = 0.0                 ! SEA ICE must be added here
+             er(4)  = 0.0                 ! NO ICE is implemented
              er(5)  = AtmosPCO2(i,j,bi,bj)! PCO2 atmopheric from BFMcoupler_VAR.h
              er(6)  = max(1.0,xpar(i,j,k,bi,bj))   ! PAR [uEin/s]  ATTENTION DAILY CYCLE 
              er(7)  = 24.0                ! 24 hours
@@ -229,19 +268,41 @@ c set sur = 1.0 if the layer is equal 1 (the land is already checked)
               endif
              er(10) = PH(i,j,k,bi,bj)     ! from BFMcoupler_VAR.h
 
+#ifdef BFMcoupler_DEBUG
+c ===== CHECK DEBUGING
+            if (i.eq.8.and.j.eq.8.and.k.eq.1) then
+       WRITE(msgBuf,'(A,E10.3,E10.3,E10.3,E10.3,E10.3)'),'BFM1:'
+     &                 ,er(1),er(2),er(3),er(4),er(5)
+       CALL PRINT_MESSAGE(msgBuf,stdUnit,SQUEEZE_RIGHT,myThid)
+       WRITE(msgBuf,'(A,E10.3,E10.3,E10.3,E10.3,E10.3)'),'BFM2:'
+     &                 ,er(6),er(7),er(8),er(9),er(10)
+       CALL PRINT_MESSAGE(msgBuf,stdUnit,SQUEEZE_RIGHT,myThid)
+       WRITE(msgBuf,'(A,E10.3,E10.3,E10.3,E10.3,E10.3)'),'BFM3:'
+     &                 ,a(1),a(2),a(3),a(4),a(5)
+       CALL PRINT_MESSAGE(msgBuf,stdUnit,SQUEEZE_RIGHT,myThid)
+       WRITE(msgBuf,'(A,E10.3,E10.3,E10.3,E10.3,E10.3)'),'BFM4:'
+     &                 ,a(6),a(7),a(8),a(9),a(10)
+       CALL PRINT_MESSAGE(msgBuf,stdUnit,SQUEEZE_RIGHT,myThid)
+              endif
+#endif /* endif BFMcoupler_debug */
+
+
 c  ===== CALL TO BFM ====
              CALL BFM0D_Input_EcologyDynamics(sur,bot,a,jptra,er)
              CALL BFM0D_reset()
              CALL EcologyDynamics()
-             CALL BFM0D_Output_EcologyDynamics(b,jptra,c,d,jptra_dia-1)
+             CALL BFM0D_Output_EcologyDynamics_surf(b,c,d,d2)
+c            CALL BFM0D_Output_EcologyDynamics(b,jptra,c,d,jptra_dia-1)
 c  ===== return of BFM tendency ====
              DO jtr=1, jptra
                  gchemTendency(i,j,k,bi,bj,jtr) = 
      &                 gchemTendency(i,j,k,bi,bj,jtr)+b(jtr) ! tendency [mmol/m3/s]
              END DO
+
+
 #ifdef BFMcoupler_DEBUG
 c ===== CHECK DEBUGING
-            DO jtr=1,51
+            DO jtr=1,jptra
             if (isnan2(b(jtr))) then
        WRITE(msgBuf,'(A,I2,1x,I3,1x,I3,1x,I3,1x,I3,1x,I3,1x,L,1x,L)'),
      &               'NAN:',jtr,i,j,k,bi,bj,sur,bot
@@ -322,6 +383,16 @@ c ===== CHECK DEBUGING
             endif
             enddo
 
+
+
+c            if (i.eq.8.and.j.eq.8.and.k.eq.1) then
+c       WRITE(msgBuf,'(A,E10.3,E10.3,E10.3,E10.3,E10.3)'),'BFM5:'
+c     &                 ,b(1),b(2),b(3),b(4),b(5)
+c       CALL PRINT_MESSAGE(msgBuf,stdUnit,SQUEEZE_RIGHT,myThid)
+c       WRITE(msgBuf,'(A,E10.3,E10.3,E10.3,E10.3,E10.3)'),'BFM6:'
+c     &                 ,b(6),b(7),b(8),b(9),b(10)
+c       CALL PRINT_MESSAGE(msgBuf,stdUnit,SQUEEZE_RIGHT,myThid)
+c             endif
 #endif  /* BFMcoupler_debug */
 
 c  ===== sinking velocity for 4 phyto
@@ -331,39 +402,17 @@ c  ===== sinking velocity for 4 phyto
              
 
              PH(i,j,k,bi,bj)=d(9) ! stored localy since needed for the Follows solver guess 
-             ENDIF ! endif HFacC>0
-c FORCING AT THE BOTTOM
-#ifdef USE_BURIAL
-               ktmp=min(nR,k+1)
-               if(hFacC(i,j,ktmp,bi,bj).eq.0. _d 0.or.k.eq.Nr) then
-       gchemTendency(i,j,k,bi,bj,ppR6c)=gchemTendency(i,j,k,bi,bj,ppR6c)
-     &              -  p_burial * pTracer(i,j,k,bi,bj,ppR6c)   ! tendency is mmolC/m3/s
-       gchemTendency(i,j,k,bi,bj,ppR6n)=gchemTendency(i,j,k,bi,bj,ppR6c)
-     &              -  p_burial * pTracer(i,j,k,bi,bj,ppR6n)   ! tendency is mmolN/m3/s
-       gchemTendency(i,j,k,bi,bj,ppR6p)=gchemTendency(i,j,k,bi,bj,ppR6c)
-     &              -  p_burial * pTracer(i,j,k,bi,bj,ppR6p)   ! tendency is mmolP/m3/s
-               endif
-#endif /* USE_BURIAL */
-#ifdef USE_BOT_FLUX
-             ktmp=min(nR,k+1)
-             if(hFacC(i,j,ktmp,bi,bj).eq.0. _d 0.or.k.eq.Nr) then
-       gchemTendency(i,j,k,bi,bj,ppO3c)=gchemTendency(i,j,k,bi,bj,ppO3c)
-     &           +   p_fluxC_bot ! tendency is mmolC/m3/s
-       gchemTendency(i,j,k,bi,bj,ppN3n)=gchemTendency(i,j,k,bi,bj,ppN3n)
-     &           +   p_fluxN_bot ! tendency is mmolN/m3/s
-       gchemTendency(i,j,k,bi,bj,ppN1p)=gchemTendency(i,j,k,bi,bj,ppN1p)
-     &           +   p_fluxP_bot ! tendency is mmolP/m3/s
-       gchemTendency(i,j,k,bi,bj,ppN5s)=gchemTendency(i,j,k,bi,bj,ppN5s)
-     &           +   p_fluxSi_bot        ! tendency is mmolSi/m3/s
-              endif
-#endif /* USE_BOT_FLUX */
 
-
-c  ====== save BFM diagnostics in MITgcm diagnostic pkg
 #ifdef ALLOW_DIAGNOSTICS
 #include "BFMcoupler_VARDIAGcopy_fromD.h"
 #endif /* ALLOW_DIAGNOSTICS */
 
+             ENDIF ! endif HFacC>0
+c NEDDED to be coded
+c             CALL burial
+c             CALL sediment_flux
+
+c  ====== save BFM diagnostics in MITgcm diagnostic pkg 
       
          ENDDO   ! enddo i cycle
          ENDDO   ! enddo j cycle
@@ -444,26 +493,144 @@ c update tendency with sinking fluxes
          ENDDO   ! enddo i cycle
 #endif /* USE_SINK */
 
-C  ==== SURFACE FORCING
-C  ==== e.g. add atmospheric forcing for N1p and N3n to tendency of
-C  ==== surface cell, N1p_dep and N3n_dep read in the files are in mmol/m3/s 
-      IF ( BFMcoupler_N1pDepFile.NE. ' '  ) THEN
+C  ==== add not only atmospheric deposition but also the contribution by 
+C  ==== rivers for N1p and N3n to the tendency of the surface cell. 
+C  ==== N1p_surfF and N3n_surfF read in the files are in mmol/m2/s. 
+C  ==== Introduction of N5s_surfF, O3c_surfF and O3h_surfF contribution
+C  ==== by rivers, where N5s_surfF and O3h_read are in mmol/m2/s,
+C  ==== O3c_surfF read is in mgC/m2/s.
+C  ==== These values are here divided by the effective height of the
+C  ==== surface cell. 
+      IF ( BFMcoupler_N1pSurfForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
        DO j=jmin,jmax
         DO i=imin,imax
       gchemTendency(i,j,1,bi,bj,ppN1p)= gchemTendency(i,j,1,bi,bj,ppN1p)
-     &              +N1p_dep(i,j,bi,bj) ! tendency is mmol/m3/s
-        ENDDO
+     &              +N1p_surfF(i,j,bi,bj)
+c     & *1/(drF(1)*hFacC(i,j,1,bi,bj)+EtaN(i,j,bi,bj))  ! tendency is mmol/m3/s
+     &            *recip_drF(1)*recip_hFacC(i,j,1,bi,bj) !tendency is mmol/m3/s  
+      ENDDO
         ENDDO
       ENDIF
-      IF ( BFMcoupler_N3nDepFile.NE. ' '  ) THEN
+      IF ( BFMcoupler_N3nSurfForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
       DO j=jmin,jmax
         DO i=imin,imax
       gchemTendency(i,j,1,bi,bj,ppN3n)= gchemTendency(i,j,1,bi,bj,ppN3n)
-     &              +N3n_dep(i,j,bi,bj) !  tendency is mmol/m3/s
-    
+     &              +N3n_surfF(i,j,bi,bj) 
+     &            *recip_drF(1)*recip_hFacC(i,j,1,bi,bj) !tendency is mmol/m3/s  
          ENDDO   
          ENDDO  
        ENDIF
+       IF ( BFMcoupler_N5sSurfForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
+       DO j=jmin,jmax
+        DO i=imin,imax
+      gchemTendency(i,j,1,bi,bj,ppN5s)= gchemTendency(i,j,1,bi,bj,ppN5s)
+     &              +N5s_surfF(i,j,bi,bj) 
+     &    *recip_drF(1)*recip_hFacC(i,j,1,bi,bj) !tendency is mmol/m3/s          
+        ENDDO
+        ENDDO
+      ENDIF
+      IF ( BFMcoupler_O3cSurfForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
+       DO j=jmin,jmax
+        DO i=imin,imax
+      gchemTendency(i,j,1,bi,bj,ppO3c)= gchemTendency(i,j,1,bi,bj,ppO3c)
+     &              +O3c_surfF(i,j,bi,bj) 
+     &  *recip_drF(1)*recip_hFacC(i,j,1,bi,bj) !tendency is mmol/m3/s  
+        ENDDO
+        ENDDO
+      ENDIF
+      IF ( BFMcoupler_O3hSurfForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
+       DO j=jmin,jmax
+        DO i=imin,imax
+      gchemTendency(i,j,1,bi,bj,ppO3h)= gchemTendency(i,j,1,bi,bj,ppO3h)
+     &              +O3h_surfF(i,j,bi,bj) 
+     &    *recip_drF(1)*recip_hFacC(i,j,1,bi,bj) !tendency is mmol/m3/s  
+        ENDDO
+        ENDDO
+      ENDIF
+      IF ( BFMcoupler_N1pBotForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
+       DO j=jmin,jmax
+        DO i=imin,imax
+      kB=kBot(i,j)
+      gchemTendency(i,j,kB,bi,bj,ppN1p)=
+     &    gchemTendency(i,j,kB,bi,bj,ppN1p)+N1p_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s  
+        ENDDO
+        ENDDO
+      ENDIF
+      IF ( BFMcoupler_N3nBotForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
+       DO j=jmin,jmax
+        DO i=imin,imax
+      kB=kBot(i,j)
+      gchemTendency(i,j,kB,bi,bj,ppN3n)=
+     &    gchemTendency(i,j,kB,bi,bj,ppN3n)+N3n_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s  
+        ENDDO
+        ENDDO
+      ENDIF
+      IF ( BFMcoupler_N4nBotForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
+       DO j=jmin,jmax
+        DO i=imin,imax
+      kB=kBot(i,j)
+      gchemTendency(i,j,kB,bi,bj,ppN4n)=
+     &    gchemTendency(i,j,kB,bi,bj,ppN4n)+N4n_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s  
+        ENDDO
+        ENDDO
+      ENDIF
+      IF ( BFMcoupler_O2oBotForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
+       DO j=jmin,jmax
+        DO i=imin,imax
+      kB=kBot(i,j)
+      gchemTendency(i,j,kB,bi,bj,ppO2o)=
+     &    gchemTendency(i,j,kB,bi,bj,ppO2o)+O2o_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s  
+        ENDDO
+        ENDDO
+      ENDIF
+      IF ( BFMcoupler_O3cBotForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
+       DO j=jmin,jmax
+        DO i=imin,imax
+      kB=kBot(i,j)
+      gchemTendency(i,j,kB,bi,bj,ppO3c)=
+     &    gchemTendency(i,j,kB,bi,bj,ppO3c)+O3c_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s  
+        ENDDO
+        ENDDO
+      ENDIF
+      IF ( BFMcoupler_O3hBotForcFile.NE. ' '  ) THEN
+c        DO j=1-OLy,sNy+OLy
+c        DO i=1-OLx,sNx+OLx
+       DO j=jmin,jmax
+        DO i=imin,imax
+      kB=kBot(i,j)
+      gchemTendency(i,j,kB,bi,bj,ppO3h)=
+     &    gchemTendency(i,j,kB,bi,bj,ppO3h)+O3h_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s  
+        ENDDO
+        ENDDO
+      ENDIF
+
+
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C ==== fill the diagnostic variables 
 #ifdef ALLOW_DIAGNOSTICS
