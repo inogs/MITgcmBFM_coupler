@@ -65,9 +65,20 @@ C     === Local variables ====
        _RL Fsink(21,Nr)
 #endif /* USE_SINK */
        INTEGER i,j,k,jtr,ktmp,iv
+
+#ifdef BFMv2
        _RL a(jptra),er(10),b(jptra),c(4),d(jptra_dia),d2(1)
 C      _RS AtmosWIND0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy) 
        logical bot,sur
+#else
+       _RL a(Nr,jptra)
+       _RL er(Nr,10)
+       _RL b(jptra,Nr)
+       _RL c(4,Nr)
+       _RL d(jptra_dia,Nr)
+       _RL d2(jptra_dia_2d)
+#endif
+
        INTEGER kBot(1-OLx:sNx+OLx,1-OLy:sNy+OLy), kB
 C     msgBuf    :: Informational/error message buffer
       CHARACTER*(MAX_LEN_MBUF) msgBuf
@@ -162,6 +173,7 @@ c atten coeff read from file xESP, or computed as shelf shading of chla
 #else 
      &   p_espWATER
 #endif
+c TO DO: should be generalized!
      &   + p_espP1*pTracer(i,j,k,bi,bj,14) ! P1i diatom
      &   + p_espP2*pTracer(i,j,k,bi,bj,19) ! P2i flag
      &   + p_espP3*pTracer(i,j,k,bi,bj,23) ! P3i picopl
@@ -181,6 +193,7 @@ c atten coeff read from file xESP, or computed as shelf shading of chla
 #else 
      &   p_espWATER
 #endif
+c TO DO: should be generalized!
      &   + p_espP1*pTracer(i,j,k-1,bi,bj,14) ! P1l diatom
      &   + p_espP2*pTracer(i,j,k-1,bi,bj,19) ! P2l flag
      &   + p_espP3*pTracer(i,j,k-1,bi,bj,23) ! P3l picopl
@@ -207,7 +220,8 @@ c atten coeff read from file xESP, or computed as shelf shading of chla
           ENDDO
          ENDDO
 
-                
+#ifdef BFMv2
+
 c      DO j=1-OLy,sNy+OLy
 c      DO i=1-OLx,sNx+OLx
       DO k=1,Nr
@@ -417,6 +431,105 @@ c  ====== save BFM diagnostics in MITgcm diagnostic pkg
          ENDDO   ! enddo i cycle
          ENDDO   ! enddo j cycle
          ENDDO ! enddo k cycle
+
+#else
+
+c      DO j=1-OLy,sNy+OLy
+c      DO i=1-OLx,sNx+OLx
+      DO j=jmin,jmax
+      DO i=imin,imax
+
+          if (HFacC(i,j,1,bi,bj).gt.0. _d 0) then
+
+             kBot(i,j) = bottom(i,j,bi,bj) ! bottom layer is computed here
+
+             a = 1.0 ! default initialization
+
+             do k=1,kBot(i,j)
+                 DO jtr=1,jptra
+                     if (pTracer(i,j,k,bi,bj,jtr).gt.0) then
+                         a(k,jtr) = pTracer(i,j,k,bi,bj,jtr)
+                     else
+                         a(k,jtr)=1.0 _d -10 ! in the case of negative values
+                     endif
+                 END DO
+             enddo
+
+             b = 0.0 ! default initialization
+             c = 0.0 ! initialized BFM sinking velocity to 0
+             d = 0.0 ! initialized BFM diagnostics to 0
+             d2 = 0.0 ! initialized BFM diagnostics to 0
+             er = 1.0 ! default initialization
+
+! Environmental regulating factors (er)
+#ifdef ALLOW_LONGSTEP
+             do k=1,kBot(i,j)
+                 er(k,1) = min(30.,LS_theta(i,j,k,bi,bj)) ! from LONGSTEP.h
+             enddo
+             er(1:kBot(i,j),2) = LS_salt(i,j,1:kBot(i,j),bi,bj) ! from LONGSTEP.h
+             er(1:kBot(i,j),3) =
+     &           rhoConst + rhoInSitu(i,j,1:kBot(i,j),bi,bj) ! rhoInSitu (density anomaly [kg/m^3] at cell center level) +
+                                                             ! + RhoConst (set equal to rhoNil=999.8 (set_defaults.F and Ini_parms.F))
+#else
+             do k=1,kBot(i,j)
+                 er(k,1)  = min(30.,theta(i,j,k,bi,bj)) ! from DYNVARS.h
+             enddo
+             er(1:kBot(i,j),2) = salt(i,j,1:kBot(i,j),bi,bj) ! from DYNVARS.h
+             er(1:kBot(i,j),3) =
+     &           rhoConst + rhoInSitu(i,j,1:kBot(i,j),bi,bj) ! rhoInSitu (density anomaly [kg/m^3] at cell center level) +
+                                                             ! + RhoConst (set equal to rhoNil=999.8 (set_defaults.F and Ini_parms.F))
+#endif /* ALLOW_LONGSTEP  */
+             er(1,4) = 0.0 ! NO ICE is implemented
+             er(1,5) = AtmosPCO2(i,j,bi,bj) ! PCO2 atmopheric from BFMcoupler_VAR.h
+             do k=1,kBot(i,j)
+                 er(k,6) = max(1.0,xpar(i,j,k,bi,bj)) ! PAR [uEin/s]  ATTENTION DAILY CYCLE 
+             enddo
+             er(1,7) = 24.0 ! 24 hours
+             do k=1,kBot(i,j)
+                 er(k,8) = drF(k)*hFacC(i,j,k,bi,bj) ! H(m) of cell considering the fract of grid box above topography
+             enddo
+             er(1,9) = wspeed(i,j,bi,bj) ! wind speed [m/s] from EXF_FIELDS.H
+              if (er(1,9).LE.0.0) then
+                    er(1,9)=0.001
+              endif
+             er(1:kBot(i,j),10) = PH(i,j,1:kBot(i,j),bi,bj) ! from BFMcoupler_VAR.h
+
+c  ===== CALL TO BFM ====
+             CALL BFM1D_Input_EcologyDynamics(kBot(i,j),a,jptra,er)
+             CALL BFM1D_reset()
+             CALL EcologyDynamics()
+             CALL BFM1D_Output_EcologyDynamics(b,c,d,d2)
+c  ===== return of BFM tendency ====
+             DO jtr=1, jptra
+                 gchemTendency(i,j,1:kBot(i,j),bi,bj,jtr) = 
+     &               gchemTendency(i,j,1:kBot(i,j),bi,bj,jtr) +
+     &               b(jtr,1:kBot(i,j)) ! tendency [mmol/m3/s]
+             END DO
+
+c  ===== sinking velocity for 4 phyto
+             DO jtr=1,4
+                   sediPI(i,j,1:kBot(i,j),bi,bj,jtr) =
+     &                 c(jtr,1:kBot(i,j)) ! sedimentation velocities of 4 phytos
+             END DO
+
+             PH(i,j,1:kBot(i,j),bi,bj)=d(9,1:kBot(i,j)) ! stored localy since needed for the Follows solver guess
+
+#ifdef ALLOW_DIAGNOSTICS
+#include "BFMcoupler_VARDIAGcopy_fromD.h"
+#endif /* ALLOW_DIAGNOSTICS */
+
+          endif ! endif HFacC>0
+
+c NEDDED to be coded
+c             CALL burial
+c             CALL sediment_flux
+
+c  ====== save BFM diagnostics in MITgcm diagnostic pkg 
+      
+      ENDDO   ! enddo i cycle
+      ENDDO   ! enddo j cycle
+
+#endif
 
 c =====  SINKING ===================
 #ifdef USE_SINK
@@ -659,6 +772,23 @@ c====== FUNCTIONS ============
         RETURN
 
         END FUNCTION isnan2
+        
+        integer function bottom(i, j, bi, bj)
+            
+            implicit none
+            
+            integer, intent(in) :: i, j, bi, bj
+            integer :: z
+            
+            z = 1
+c           TO DO: dangerous condition
+            do while(ceiling(HfacC(i, j, z, bi, bj)) .eq. 1)
+                z = z + 1
+            enddo
+            
+            bottom = z - 1
+
+        end function bottom
 c=====================================
       END
 
@@ -667,7 +797,3 @@ c=====================================
 
 
 C============================================================================
-
-
-
-

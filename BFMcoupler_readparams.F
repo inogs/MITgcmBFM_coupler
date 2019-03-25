@@ -167,8 +167,18 @@ C Inizialize Libraries of BFM model
       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,
      I                    SQUEEZE_RIGHT, myThid )
 
+#ifdef BFMv2
+
       call BFM0D_NO_BOXES(1,1,1,1,1)
-      call BFM_Initialize()
+
+#else
+
+      call BFM0D_NO_BOXES(Nr,1,1,Nr,1)
+      call BFM0D_INIT_IO_CHANNELS()
+
+#endif
+
+      call Initialize()
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
       _END_MASTER(myThid)
