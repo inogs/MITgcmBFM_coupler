@@ -55,7 +55,7 @@ class BFM_vars(object):
         diag_vars = parse_namelist(namelist, diag_var_section, diag_var_identifier, diag_var_units_identifier)
         diag_vars_2d = parse_namelist(namelist, diag_var_section_2d, diag_var_identifier_2d, diag_var_units_identifier_2d)
         self._diag_vars = diag_vars + diag_vars_2d # diag_vars and diag_vars_2d in one single list
-        self._diag_vars_MIT = list() # MIT-only diagnostic variables, initialized to null
+        self._diag_vars_MIT = list() # MITgcm-BFM-only diagnostic variables, initialized to null
 
 
 
@@ -85,7 +85,7 @@ class BFM_vars(object):
         print self._vars
         print('\nDiagnostic variables:\n')
         print self._diag_vars
-        print('\nDiagnostic variables - MIT-only:\n')
+        print('\nDiagnostic variables - MITgcm-BFM-only:\n')
         print self._diag_vars_MIT
 
 
@@ -160,7 +160,7 @@ C     Define diagnostics Names :
                 ofile.write('     I       diagName, diagCode, diagUnits, diagTitle, 0, myThid )' + '\n')
                 ofile.write('C ' + '\n')
 
-            # loop on MIT-only diagnostic variables
+            # loop on MITgcm-BFM-only diagnostic variables
             for var in self._diag_vars_MIT:
                 ofile.write('      diagName  = \'' + var[1][0] + '\'\n')
                 ofile.write('      diagTitle = \'' + var[1][0] + '\'\n') # long name set equal to name
@@ -192,7 +192,7 @@ C
             for var in self._diag_vars:
                 ofile.write('      _RL   dia' + var[0] + '(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr)\n')
 
-            # loop on MIT-only diagnostic variables
+            # loop on MITgcm_BFM-only diagnostic variables
             for var in self._diag_vars_MIT:
                 ofile.write('      _RL   dia' + var[1][0] + '(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr)\n')
 
@@ -222,7 +222,7 @@ C
             for var in self._diag_vars:
                 ofile.write('              dia' + var[0] + '(i,j,k)=0. _d 0\n')
 
-            # loop on MIT-only diagnostic variables
+            # loop on MITgcm-BFM-only diagnostic variables
             for var in self._diag_vars_MIT:
                 ofile.write('              dia' + var[1][0] + '(i,j,k)=0. _d 0\n')
 
@@ -246,7 +246,7 @@ C '''
             for var in self._diag_vars:
                 ofile.write('              dia' + var[0] + '(i,j,1:kBot(i,j))=d(' + str(self._diag_vars.index(var)) + ',1:kBot(i,j))\n')
 
-            # loop on MIT-only diagnostic variables
+            # loop on MITgcm-BFM-only diagnostic variables
             for var in self._diag_vars_MIT:
                 ofile.write('              dia' + var[1][0] + '(i,j,1:kBot(i,j))=er(1:kBot(i,j),' + str(var[0]) + ')\n')
 
@@ -268,7 +268,7 @@ C fill the diagnostic memory using DIAGNOSTICS_FILL
                 ofile.write('        CALL DIAGNOSTICS_FILL(dia' + var[0] + ',\'' + var[0] + '\'\n')
                 ofile.write('     &  ,0,Nr,2,bi,bj,myThid)\n')
 
-            # loop on MIT-only diagnostic variables
+            # loop on MITgcm-BFM-only diagnostic variables
             for var in self._diag_vars_MIT:
                 ofile.write('        CALL DIAGNOSTICS_FILL(dia' + var[1][0] + ',\'' + var[1][0] + '\'\n')
                 ofile.write('     &  ,0,Nr,2,bi,bj,myThid)\n')
@@ -371,7 +371,7 @@ C fill the diagnostic memory using DIAGNOSTICS_FILL
                 ofile.write(' timePhase(' + str(self._diag_vars.index(var)) + ')  = ' + default_time_phase + ',\n')
                 ofile.write('#\n')
 
-            # loop on MIT-only diagnostic variables
+            # loop on MITgcm-BFM-only diagnostic variables
             for var in self._diag_vars_MIT:
                 ofile.write(' fields(1,' + str(var[0]) + ')  = \'' + var[1][0] + '\',\n')
                 ofile.write(' fileName(' + str(var[0]) + ')  = \'' + var[1][0] + '\',\n')
@@ -388,7 +388,7 @@ if __name__ == '__main__':
     # main object istantiation
     my_BFM_vars = BFM_vars('etc/namelist.passivetrc')
 
-    # add missing MIT variables
+    # add missing MITgcm-BFM variables
     my_BFM_vars.add_diag_var_MIT('wspeed', 'm/s', 9)
     my_BFM_vars.add_diag_var_MIT('PCO2atm', 'kg/m3', 5)
 
