@@ -1,4 +1,7 @@
-'''
+import argparse
+
+def argument():
+    parser = argparse.ArgumentParser(description = '''
 BFMcoupler configuration script
 
 The script parses the 'namelist.passivetrc' bfm parameter file
@@ -8,8 +11,17 @@ Main class is bfm_vars, which contains the main vars list
 and provides all the methods that need to be called
 for the parameter files generation
 '''
+, formatter_class=argparse.RawTextHelpFormatter)
 
 
+    parser.add_argument(   '--inputfile','-i',
+                                type = str,
+                                required = True,
+                                help = '''namelist.passivetrc''')
+
+    return parser.parse_args()
+
+args = argument()
 
 import re
 
@@ -386,7 +398,7 @@ C fill the diagnostic memory using DIAGNOSTICS_FILL
 if __name__ == '__main__':
 
     # main object istantiation
-    my_BFM_vars = BFM_vars('etc/namelist.passivetrc')
+    my_BFM_vars = BFM_vars(args.inputfile)
 
     # add missing MITgcm-BFM variables
     my_BFM_vars.add_diag_var_MIT('wspeed', 'm/s', 9)
