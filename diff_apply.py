@@ -1,23 +1,3 @@
-import argparse
-def argument():
-    parser = argparse.ArgumentParser(description = '''
-    Applys a patch to the MITgcm source files
-    ''', formatter_class=argparse.RawTextHelpFormatter)
-
-
-    parser.add_argument(   '--inputfile','-i',
-                                type = str,
-                                required = True,
-                                help = '''input file name''')
-    parser.add_argument(   '--outfile','-o',
-                                type = str,
-                                required = True,
-                                help = '''output file name''')
-
-
-    return parser.parse_args()
-
-args = argument()
 from commons.utils import file2stringlist
 import os
 
@@ -33,8 +13,24 @@ CALL_LINES=[
 "      ENDIF",
 "#endif"]
 
+def insert_lines(orig_lines,INCLUDE_LINES, CALL_LINES, interface_line,end_line):
+    OUTLINES=[]
+    for iline in range(interface_line):
+        OUTLINES.append(orig_lines[iline])
 
-filename=args.inputfile
+    for line in INCLUDE_LINES: OUTLINES.append(line)
+    for iline in range(interface_line,end_line):
+        OUTLINES.append(orig_lines[iline])
+
+    for line in CALL_LINES: OUTLINES.append(line)
+    for iline in range(end_line,nLINES):
+        OUTLINES.append(orig_lines[iline])
+
+    OUTLINES=[line + "\n" for line in OUTLINES]
+    return OUTLINES
+
+filename="gchem_init_vari.F"
+outfile ="gchem_init_vari.F_new"
 PKG=os.path.basename(filename).rsplit("_")[0].upper()
 end_string="#endif /* ALLOW_%s */" %PKG
 
@@ -46,22 +42,9 @@ for iline, line in enumerate(LINES):
     if line.find("INTERFACE: ==") >-1: interface_line=iline
     if line.find(end_string)>-1: end_line=iline
         
-OUTLINES=[]
-for iline in range(interface_line):
-    OUTLINES.append(LINES[iline])
+OUTLINES=insert_lines(LINES, INCLUDE_LINES, CALL_LINES, interface_line, end_line)
 
-for line in INCLUDE_LINES: OUTLINES.append(line)
-for iline in range(interface_line,end_line):
-    OUTLINES.append(LINES[iline])
-
-for line in CALL_LINES: OUTLINES.append(line)
-for iline in range(end_line,nLINES):
-    OUTLINES.append(LINES[iline])
-
-
-OUTLINES=[line + "\n" for line in OUTLINES]
-
-fid=open(args.outfile,'w')
+fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
 
