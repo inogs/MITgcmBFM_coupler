@@ -1,7 +1,7 @@
 from commons.utils import file2stringlist
 import os
 
-def insert_lines(orig_lines,NEW_LINES,position_line,nLINES):
+def insert_lines(orig_lines,NEW_LINES,position_line,nLINES,final=False):
     OUTLINES=[]
     for iline in range(position_line):
         OUTLINES.append(orig_lines[iline])
@@ -10,8 +10,8 @@ def insert_lines(orig_lines,NEW_LINES,position_line,nLINES):
 
     for iline in range(position_line,nLINES):
         OUTLINES.append(orig_lines[iline])
-
-    OUTLINES=[line + "\n" for line in OUTLINES]
+    if final:
+        OUTLINES=[line + "\n" for line in OUTLINES]
     return OUTLINES
 
 MITCODE="../MITgcm/pkg/gchem/"
@@ -43,7 +43,7 @@ NEW_LINES=[
 "         CALL BFMcoupler_INI_FORCING(myThid)",
 "      ENDIF",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
@@ -62,7 +62,7 @@ NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "         call BFMcoupler_INIT_FIXED(myThid)",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
@@ -81,7 +81,7 @@ NEW_LINES=[
 "       CALl BFMcoupler_FIELDS_LOAD(myIter,myTime,myThid)",
 "      ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
@@ -122,7 +122,7 @@ NEW_LINES=[
 "        CALL BFMcoupler_READPARMS(myThid)",
 "      ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]     
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
@@ -160,7 +160,7 @@ NEW_LINES=[
 "        ENDDO",
 "       ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]    
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
@@ -188,7 +188,7 @@ NEW_LINES=[
 "     &             ,useBFMcoupler",
 "      LOGICAL useBFMcoupler",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
@@ -205,7 +205,7 @@ NEW_LINES=[
 "#undef GCHEM_SEPARATE_FORCING",
 "c undefining gchem_separate_forcing actives BFMcoupler_calc_tendency and add_tendency",
 "c  #define GCHEM_SEPARATE_FORCING"]    
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()    
@@ -226,7 +226,7 @@ NEW_LINES=[
 "c CGP 2015/04/03 adding call to gchem_calc_tendency",
 "      CALL GCHEM_CALC_TENDENCY( myTime, myIter, myThid )",
 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()    
@@ -274,7 +274,7 @@ NEW_LINES=[
 "#endif /* BFMCOUPLER */",
 "      ENDIF",
 "#endif /* ALLOW_GCHEM */ "]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()    
