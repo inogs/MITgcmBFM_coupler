@@ -430,7 +430,7 @@ if __name__ == '__main__':
     my_BFM_vars.set_vars_property('EvPrRn', '0.0')
 
     # debug
-    my_BFM_vars.flush()
+    #my_BFM_vars.flush()
 
     # output files
     if args.type=='code':
