@@ -1,5 +1,59 @@
-from commons.utils import file2stringlist
 import os
+import argparse
+
+def argument():
+    parser = argparse.ArgumentParser(description = '''
+   Writes:
+   gchem_init_vari.F
+   gchem_init_fixed.F
+   gchem_fields_load.F
+   gchem_readparms.F
+   gchem_calc_tendency.F
+   longstep_thermodynamics.F
+   ptracers_reset.F
+   by reading from MITgcm code
+
+'''
+, formatter_class=argparse.RawTextHelpFormatter)
+
+
+    parser.add_argument(   '--inputdir','-i',
+                                type = str,
+                                required = True,
+                                help = '''namelist.passivetrc''')
+    parser.add_argument(   '--outdir','-o',
+                                type = str,
+                                required = True,
+                                help = '''path of the output dir''')
+
+    return parser.parse_args()
+
+args = argument()
+
+
+
+def file2stringlist(filename):
+    '''
+    Argument : string - a path name indicating a text file
+    Returns  : a list of strings
+
+    A text file is converted in a list of strings, one for each row.
+
+    '''
+    LIST=[]
+    filein=open(filename)
+    for line in filein:
+        LIST.append(line[:-1])
+    filein.close()
+    return LIST
+
+def addsep(string):
+    if string[-1] != os.sep:
+        return string + os.sep
+    else:
+        return  string
+
+
 
 def insert_lines(orig_lines,NEW_LINES,position_line,nLINES,final=False):
     OUTLINES=[]
@@ -14,8 +68,10 @@ def insert_lines(orig_lines,NEW_LINES,position_line,nLINES,final=False):
         OUTLINES=[line + "\n" for line in OUTLINES]
     return OUTLINES
 
-MITCODE="../MITgcm/pkg/gchem/"
-MYCODE="../code_NADRI/"
+INPUTDIR=addsep(args.inputdir)
+OUTDIR=addsep(args.outdir)
+MITCODE=INPUTDIR + "pkg/gchem/"
+MYCODE=OUTDIR
 
 # gchem_init_vari.F
 filename="gchem_init_vari.F"
@@ -212,7 +268,7 @@ fid.close()
     
 
 ##### applying differences in longstep Pkg
-MITCODE="../MITgcm/pkg/longstep/"
+MITCODE=INPUTDIR + "pkg/longstep/"
 # longstep_thermodynamics.F
 filename="longstep_thermodynamics.F"
 infile=MITCODE + filename
@@ -233,8 +289,7 @@ fid.close()
     
 
 ##### applying differences in ptracer Pkg
-MITCODE="../MITgcm/pkg/ptracers/"
-# ptracers_reset.F
+MITCODE=INPUTDIR + "pkg/ptracers/"
 filename="ptracers_reset.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
