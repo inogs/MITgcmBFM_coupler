@@ -18,13 +18,29 @@ for the parameter files generation
                                 type = str,
                                 required = True,
                                 help = '''namelist.passivetrc''')
+    parser.add_argument(   '--type','-t',
+                                type = str,
+                                required = True,
+                                choices = ['code','namelist'],
+                                help = '''Flag to generate code or namelists''')
+    parser.add_argument(   '--outdir','-o',
+                                type = str,
+                                required = True,
+                                help = '''path of the output dir''')
 
     return parser.parse_args()
 
 args = argument()
 
-import re
+import re, os
 
+def addsep(string):
+    if string[-1] != os.sep:
+        return string + os.sep
+    else:
+        return  string
+
+OUTDIR=addsep(args.outdir)
 
 
 def parse_namelist(namelist, section, var_identifier, units_identifier):
@@ -417,10 +433,12 @@ if __name__ == '__main__':
     my_BFM_vars.flush()
 
     # output files
-    my_BFM_vars.write_diagnostic_init()
-    my_BFM_vars.write_local()
-    my_BFM_vars.write_init()
-    my_BFM_vars.write_copy_from_d()
-    my_BFM_vars.write_fill_diags()
-    my_BFM_vars.write_data_ptracers()
-    my_BFM_vars.write_data_diagnostic()
+    if args.type=='code':
+        my_BFM_vars.write_diagnostic_init(OUTDIR+'BFMcoupler_diagnostics_init.F')
+        my_BFM_vars.write_local(OUTDIR+'BFMcoupler_VARDIAGlocal.h')
+        my_BFM_vars.write_init(OUTDIR+'BFMcoupler_VARDIAGinitializ.h')
+        my_BFM_vars.write_copy_from_d(OUTDIR+'BFMcoupler_VARDIAGcopy_fromD.h')
+        my_BFM_vars.write_fill_diags(OUTDIR+'BFMcoupler_VARDIAG_fill_diags.h')
+    if args.type=='namelist':
+        my_BFM_vars.write_data_ptracers(OUTDIR + 'data.ptracers')
+        my_BFM_vars.write_data_diagnostic(OUTDIR + 'data.diagnostic')
