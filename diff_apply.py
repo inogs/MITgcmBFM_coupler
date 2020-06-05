@@ -9,6 +9,8 @@ def argument():
    gchem_fields_load.F
    gchem_readparms.F
    gchem_calc_tendency.F
+   GCHEM.h
+   GCHEM_OPTIONS.h
    longstep_thermodynamics.F
    ptracers_reset.F
    by reading from MITgcm code
@@ -154,7 +156,7 @@ for iline, line in enumerate(LINES):
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",   
 "c                 useBFMcoupler must be read in namelist",
-"     &           ,useBFMcoupler,",
+"     &            useBFMcoupler,",
 "#endif"]
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
 
@@ -241,10 +243,10 @@ for iline, line in enumerate(LINES):
     if line.find("     &              useDARWIN")>-1: position_line=iline
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
-"     &             ,useBFMcoupler",
+"     &              ,useBFMcoupler",
 "      LOGICAL useBFMcoupler",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
@@ -299,7 +301,7 @@ for iline, line in enumerate(LINES):
     if line.find("C     !INPUT PARAMETERS:")>-1: position_line=iline
 NEW_LINES=[
 "#ifdef ALLOW_GCHEM",
-"#include " + "" + "GCHEM.h" + "",
+"#include \"GCHEM.h\"",
 "#endif"]  
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
 LINES=OUTLINES
@@ -309,7 +311,7 @@ for iline, line in enumerate(LINES):
 NEW_LINES=[
 "c check for negative values of pTracer variables and set them to 1._d-10",
 "#ifdef ALLOW_GCHEM",
-"      IF ( useGCHEM ) THEN|",
+"      IF ( useGCHEM ) THEN",
 "#ifdef ALLOW_BFMCOUPLER",
 "         IF (useBFMcoupler) THEN",
 "           DO bj = myByLo(myThid), myByHi(myThid)",
