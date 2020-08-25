@@ -45,8 +45,8 @@ OUTDIR=addsep(args.outdir)
 
 def parse_namelist(namelist, section, var_identifier, units_identifier):
 
-    var = dict()
-    units = dict()
+    var = list()
+    units = list()
     parse = False
 
     with open(namelist, 'r') as nml:
@@ -57,16 +57,13 @@ def parse_namelist(namelist, section, var_identifier, units_identifier):
                 parse = False
             elif parse:
                 if var_identifier in line:
-                    key = int(re.findall(r'\(([^)]*)\)', line)[0])
                     val = re.findall(r'\"([^"]*)\"', line)[0]
-                    var[key] = val
+                    var.append(val)
                 elif units_identifier in line:
-                    key = int(re.findall(r'\(([^)]*)\)', line)[0])
                     val = re.findall(r'\"([^"]*)\"', line)[0]
-                    units[key] = val
-
-    return sorted(list({(var[idx], units[idx]) for idx in var.keys()}))
-
+                    units.append(val)
+    n=len(var)
+    return [(var[k], units[k]) for k in range(n)]
 
 
 class BFM_vars(object):
