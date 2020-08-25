@@ -441,7 +441,7 @@ c      DO i=1-OLx,sNx+OLx
 
           if (HFacC(i,j,1,bi,bj).gt.0. _d 0) then
 
-             kBot(i,j) = bottom(i,j,bi,bj) ! bottom layer is computed here
+             kBot(i,j) = bottom(i,j,bi,bj,Nr) ! bottom layer is computed here
 
              a = 1.0 ! default initialization
 
@@ -773,17 +773,19 @@ c====== FUNCTIONS ============
 
         END FUNCTION isnan2
         
-        integer function bottom(i, j, bi, bj)
+        integer function bottom(i, j, bi, bj, Nr)
             
             implicit none
             
-            integer, intent(in) :: i, j, bi, bj
-            integer :: z
+            integer, intent(in) :: i, j, bi, bj, Nr
+            integer :: z, z1
             
             z = 1
 c           TO DO: dangerous condition
-            do while(ceiling(HfacC(i, j, z, bi, bj)) .eq. 1)
-                z = z + 1
+            do z1 = 1,Nr 
+               if (ceiling(HfacC(i, j, z1, bi, bj)) .eq. 1) then
+                  z = z + 1
+               endif
             enddo
             
             bottom = z - 1
