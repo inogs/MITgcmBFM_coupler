@@ -290,7 +290,8 @@ C fill the diagnostic memory using DIAGNOSTICS_FILL
 
             # loop on diagnostic variables
             for var in self._diag_vars:
-                ofile.write('        CALL DIAGNOSTICS_FILL(dia' + var[0] + ',\'' + var[0] + '\'\n')
+                varname=var[0] + " "*8
+                ofile.write('        CALL DIAGNOSTICS_FILL(dia' + var[0] + ',\'' + varname[:8] + '\'\n')
                 ofile.write('     &  ,0,Nr,2,bi,bj,myThid)\n')
 
             # loop on MITgcm-BFM-only diagnostic variables

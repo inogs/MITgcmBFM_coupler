@@ -50,8 +50,7 @@ def reducer8(String):
     RULES={"PPY_ii":"_", "BFM1D_exR2ac_ii":"exR2ac", "MEZ_ii":"_",  "MIZ_ii":"_", "OMT_ii":"_", "PBA_ii":"_" }
     for r in RULES.keys():
         String = String.replace(r, RULES[r])
-    long_string = String + "________"
-    return long_string[:8]
+    return String[:8]
 
 F=file2stringlist(args.inputfile)
 
@@ -71,7 +70,7 @@ def stringlist_modify(LINES, section, var_identifier):
     return LINES
 
 F = stringlist_modify(F, section="&NATTRC_DIAG", var_identifier='dianm')
-F = stringlist_modify(F, section="&NATTRC_DIAG_2D", var_identifier='dianm_2d')
+F = stringlist_modify(F, section="&NATTRC_DIAG_2D", var_identifier='dianm')
 
 dumpfile(F, args.outfile)
        
