@@ -59,7 +59,7 @@ F=file2stringlist(args.inputfile)
 def stringlist_modify(LINES, section, var_identifier):
     parse=False
     for iline, line in enumerate(LINES):
-        if line==('&'+ section):
+        if line.strip()==section:
             parse=True
         if parse:
             if var_identifier in line:
@@ -70,8 +70,8 @@ def stringlist_modify(LINES, section, var_identifier):
                 break
     return LINES
 
-F = stringlist_modify(F, section="NATTRC_DIAG", var_identifier='dianm')
-F = stringlist_modify(F, section="NATTRC_DIAG_2D", var_identifier='dianm_2d')
+F = stringlist_modify(F, section="&NATTRC_DIAG", var_identifier='dianm')
+F = stringlist_modify(F, section="&NATTRC_DIAG_2D", var_identifier='dianm_2d')
 
 dumpfile(F, args.outfile)
        
