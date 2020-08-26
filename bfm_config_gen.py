@@ -414,8 +414,8 @@ if __name__ == '__main__':
     my_BFM_vars = BFM_vars(args.inputfile)
 
     # add missing MITgcm-BFM variables
-    my_BFM_vars.add_diag_var_MIT('wspeed', 'm/s', 9)
-    my_BFM_vars.add_diag_var_MIT('PCO2atm', 'kg/m3', 5)
+    #my_BFM_vars.add_diag_var_MIT('wspeed', 'm/s', 9)
+    #my_BFM_vars.add_diag_var_MIT('PCO2atm', 'kg/m3', 5)
 
     # define additional tracers properties
     my_BFM_vars.set_vars_property('ADVscheme', '33')
