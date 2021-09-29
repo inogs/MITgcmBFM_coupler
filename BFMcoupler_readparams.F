@@ -1,6 +1,6 @@
 C $Header: /MITgcm/pkg/BFMcoupler/BFMcoupler_readparms.F,v 1.1 2014/04/09
-C $Name:  Gianpiero Cossaini
-C modified 15 feb by Valeria
+C $Name:  Gianpiero Cossarini
+C 2018/02/15 edited by Valeria Di Biagio
 
 #include "BFMcoupler_OPTIONS.h"
 CBOP
@@ -56,13 +56,7 @@ C     iUnit     :: Work variable for IO unit number
      &          BFMcoupler_O3hSurfForcFile,BFMcoupler_N1pBotForcFile, 
      &          BFMcoupler_N3nBotForcFile,BFMcoupler_N4nBotForcFile,
      &          BFMcoupler_O2oBotForcFile,BFMcoupler_O3cBotForcFile,
-     &          BFMcoupler_O3hBotForcFile,BFMcoupler_CG01BotForcFile,
-     &          BFMcoupler_CG02BotForcFile, BFMcoupler_CG03BotForcFile, 
-     &          BFMcoupler_CG04BotForcFile, BFMcoupler_CG05BotForcFile,
-     &          BFMcoupler_CG06BotForcFile, BFMcoupler_CG07BotForcFile,
-     &          BFMcoupler_CG08BotForcFile, BFMcoupler_CG09BotForcFile,
-     &          BFMcoupler_CG10BotForcFile, BFMcoupler_CG11BotForcFile,
-     &          BFMcoupler_CG12BotForcFile
+     &          BFMcoupler_O3hBotForcFile
 #ifdef USE_SINK
      &          ,vsed
 #endif
@@ -89,18 +83,6 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
        BFMcoupler_O2oBotForcFile= ' '
        BFMcoupler_O3cBotForcFile= ' '
        BFMcoupler_O3hBotForcFile= ' '
-       BFMcoupler_CG01BotForcFile= ' '
-       BFMcoupler_CG02BotForcFile= ' '
-       BFMcoupler_CG03BotForcFile= ' '
-       BFMcoupler_CG04BotForcFile= ' '
-       BFMcoupler_CG05BotForcFile= ' '
-       BFMcoupler_CG06BotForcFile= ' '
-       BFMcoupler_CG07BotForcFile= ' '
-       BFMcoupler_CG08BotForcFile= ' '
-       BFMcoupler_CG09BotForcFile= ' '
-       BFMcoupler_CG10BotForcFile= ' '
-       BFMcoupler_CG11BotForcFile= ' '
-       BFMcoupler_CG12BotForcFile= ' '
        BFMcoupler_forcingPeriod = externForcingPeriod
        BFMcoupler_forcingCycle  = externForcingCycle
 #ifdef USE_SINK

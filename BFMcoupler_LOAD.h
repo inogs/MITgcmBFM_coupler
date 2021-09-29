@@ -1,9 +1,7 @@
 C $Header: /MITgcm/pkg/BFMcoupler/BFMcoupler_LOAD.h,v 1.01
-C 2014/04/09
-C modified 3 sept 2015 by Valeria, introducing N1p, N3n, N5s, O3c, O3h surface forcing
-C by rivers
-C and then in 5 sept 2017 for the bottom contributions
-C and in 15 feb 2018 for the CG tracers 
+C 2014/04/09 by Gianpiero Cossarini
+C 2015/09/03 edited by Valeria Di Biagio: introducing N1p, N3n, N5s, O3c, O3h surface contribution
+C 2017/09/05 edited by Valeria Di Biagio: bottom contributions
 
 C--   COMMON /BFMcoupler_LOAD/
 C     BFMcoupler_ldRec     :: time-record currently loaded (in temp arrays *[1])
@@ -19,13 +17,7 @@ C     BFMcoupler_ldRec     :: time-record currently loaded (in temp arrays *[1])
      &    O3h_surfF0,O3h_surfF1,N1p_botF0,N1p_botF1,
      &    N3n_botF0,N3n_botF1,N4n_botF0,N4n_botF1,
      &    O2o_botF0,O2o_botF1,O3c_botF0,O3c_botF1,
-     &    O3h_botF0,O3h_botF1,CG01_botF0,CG01_botF1,
-     &    CG02_botF0,CG02_botF1,CG03_botF0,CG03_botF1,
-     &    CG04_botF0,CG04_botF1,CG05_botF0,CG05_botF1,
-     &    CG06_botF0,CG06_botF1,CG07_botF0,CG07_botF1,
-     &    CG08_botF0,CG08_botF1,CG09_botF0,CG09_botF1,
-     &    CG10_botF0,CG10_botF1,CG11_botF0,CG11_botF1,
-     &    CG12_botF0,CG12_botF1
+     &    O3h_botF0,O3h_botF1
 #ifdef READ_xESP
      &    ,xESP0,xESP1
 #endif
@@ -60,30 +52,6 @@ C     BFMcoupler_ldRec     :: time-record currently loaded (in temp arrays *[1])
       _RS O3c_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RS O3h_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RS O3h_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG01_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG01_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG02_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG02_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG03_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG03_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG04_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG04_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG05_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG05_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG06_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG06_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG07_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG07_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG08_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG08_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG09_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG09_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG10_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG10_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG11_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG11_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG12_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CG12_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
 #ifdef READ_xESP
       _RS xESP0 (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RS xESP1 (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
