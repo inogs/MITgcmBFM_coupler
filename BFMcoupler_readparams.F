@@ -7,7 +7,7 @@ CBOP
 C !ROUTINE: BFMcoupler_READPARMS
 C !INTERFACE: ==========================================================
       SUBROUTINE BFMcoupler_READPARMS( myThid )
-
+      use api_bfm
 C     !DESCRIPTION: \bv
 C     *==========================================================*
 C     | S/R BFMcoupler_READPARMS
@@ -156,6 +156,8 @@ C Inizialize Libraries of BFM model
 #else
 
       call BFM0D_NO_BOXES(Nr,1,1,Nr,1)
+      parallel_rank=MyProcId
+      call Init_bfm()
       call BFM0D_INIT_IO_CHANNELS()
 
 #endif
