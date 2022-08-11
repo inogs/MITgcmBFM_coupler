@@ -9,12 +9,14 @@ def argument():
    gchem_fields_load.F
    gchem_readparms.F
    gchem_calc_tendency.F
+   longstep_gchem_calc_tendency.F"
    GCHEM.h
    GCHEM_OPTIONS.h
    longstep_thermodynamics.F
    ptracers_reset.F
-   by reading from MITgcm code
+   GCHEM_FIELDS.H
 
+   by reading from MITgcm code
 '''
 , formatter_class=argparse.RawTextHelpFormatter)
 
@@ -69,13 +71,27 @@ def insert_lines(orig_lines,NEW_LINES,position_line,nLINES,final=False):
     if final:
         OUTLINES=[line + "\n" for line in OUTLINES]
     return OUTLINES
+def replace_lines(orig_lines, old, new_lines):
+    OUTLINES=[]
+    found=False
+    for line in orig_lines:
+        if line.find(old) > -1 :
+            found = True
+            for dest_line in new_lines:
+                OUTLINES.append(dest_line + "\n")
+        else:
+            OUTLINES.append(line)
+    if not found :
+        print(old, "Not found")
+        return None
+    return OUTLINES
 
 INPUTDIR=addsep(args.inputdir)
 OUTDIR=addsep(args.outdir)
 MITCODE=INPUTDIR + "pkg/gchem/"
 MYCODE=OUTDIR
 
-# gchem_init_vari.F
+
 filename="gchem_init_vari.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
@@ -108,7 +124,7 @@ fid.close()
 
 
 
-# gchem_init_fixed.F
+
 filename="gchem_init_fixed.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
@@ -125,7 +141,7 @@ fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
 
-# gchem_fields_load.F
+
 filename="gchem_fields_load.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
@@ -144,7 +160,7 @@ fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
 
-# gchem_readparms.F
+
 filename="gchem_readparms.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
@@ -187,7 +203,6 @@ fid.writelines(OUTLINES)
 fid.close()
 
 
-# gchem_calc_tendency.F
 filename="gchem_calc_tendency.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
@@ -217,14 +232,52 @@ NEW_LINES=[
 "        ENDDO",
 "        ENDDO",
 "       ENDIF",
-"#endif /* ALLOW_BFMCOUPLER */"]    
+"#endif /* ALLOW_BFMCOUPLER */"
+"#endif /* ALLOW_LONGSTEP */"]
+
+
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
+LINES=OUTLINES
+nLINES=len(LINES)
+for iline, line in enumerate(LINES):
+    if line.find("# ifndef GCHEM_SEPARATE_FORCING")>-1: position_line=iline
+NEW_LINES=["# ifndef ALLOW_LONGSTEP"]
+nLINES = len(LINES)
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
 
 
-# GCHEM.h
+outfile=MYCODE + 'longstep_gchem_calc_tendency.F'
+LINES=OUTLINES # we'll apply changes from gchem_calc_tendency.F
+
+l0="C $Header: /u/gcmpack/MITgcm/pkg/gchem/gchem_calc_tendency.F,v 1.5 2013/06/10 02:52:57 jmc Exp $"
+l1="C $Header: longstep_gchem_calc_tendency.F,v 1.5 2015/04/01 02:52:57 GPC Exp $"
+OUTLINES = replace_lines(LINES,l0,[l1])
+
+l0="C !ROUTINE: GCHEM_CALC_TENDENCY"
+l1="C !ROUTINE: LONGSTEP_GCHEM_CALC_TENDENCY"
+OUTLINES = replace_lines(OUTLINES,l0,[l1] )
+
+
+l0= "      SUBROUTINE GCHEM_CALC_TENDENCY("
+l1 = ["C version of GCHEM_CALC_TENDENCY called by LONGSTEP package",
+ "      SUBROUTINE LONGSTEP_GCHEM_CALC_TENDENCY("]
+OUTLINES = replace_lines(OUTLINES,l0, l1 )
+
+l0 = "# ifndef ALLOW_LONGSTEP"
+l1 = "# ifdef ALLOW_LONGSTEP"
+OUTLINES = replace_lines(OUTLINES,l0,[l1] )
+
+fid=open(outfile,'w')
+fid.writelines(OUTLINES)
+fid.close()
+
+
+
+
+
 filename="GCHEM.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
@@ -251,7 +304,7 @@ fid=open(outfile,'w')
 fid.writelines(OUTLINES)
 fid.close()
 
-# GCHEM_OPTIONS.h
+
 filename="GCHEM_OPTIONS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
@@ -271,7 +324,6 @@ fid.close()
 
 ##### applying differences in longstep Pkg
 MITCODE=INPUTDIR + "pkg/longstep/"
-# longstep_thermodynamics.F
 filename="longstep_thermodynamics.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
@@ -282,7 +334,7 @@ for iline, line in enumerate(LINES):
 NEW_LINES=[
 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
 "c CGP 2015/04/03 adding call to gchem_calc_tendency",
-"      CALL GCHEM_CALC_TENDENCY( myTime, myIter, myThid )",
+"      CALL LONGSTEP_GCHEM_CALC_TENDENCY( myTime, myIter, myThid )",
 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"]
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
 fid=open(outfile,'w')
@@ -337,9 +389,26 @@ fid.writelines(OUTLINES)
 fid.close()    
 
 
-    
-    
-    
+
+filename="GCHEM_FIELDS.h"
+MITCODE=INPUTDIR + "pkg/gchem/"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES=file2stringlist(infile)
+nLINES = len(LINES)
+
+for iline, line in enumerate(LINES):
+    if line.find("#endif /* GCHEM_SEPARATE_FORCING */")>-1: position_line=iline
+NEW_LINES=["#ifdef GCHEM_SEPARATE_FORCING",
+"      _RL gchemTendency(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy,",
+"     &                  PTRACERS_num)",
+"      COMMON /GCHEM_FIELDS/",
+"     &     gchemTendency",
+"#endif /* when define GCHEM_SEPARATE_FORCING */"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
+fid=open(outfile,'w')
+fid.writelines(OUTLINES)
+fid.close()
 
 
 
