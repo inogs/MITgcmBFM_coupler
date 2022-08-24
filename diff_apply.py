@@ -236,7 +236,7 @@ NEW_LINES=[
 "#endif /* ALLOW_LONGSTEP */"]
 
 
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=False)
 LINES=OUTLINES
 nLINES=len(LINES)
 for iline, line in enumerate(LINES):
