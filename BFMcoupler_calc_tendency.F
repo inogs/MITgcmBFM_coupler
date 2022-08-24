@@ -72,7 +72,7 @@ C      _RS AtmosWIND0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
        logical bot,sur
 #else
        _RL a(Nr,jptra)
-       _RL er(Nr,10)
+       _RL er(Nr,11)
        _RL b(jptra,Nr)
        _RL c(4,Nr)
        _RL d(jptra_dia,Nr)
@@ -493,6 +493,7 @@ c      DO i=1-OLx,sNx+OLx
                     er(1,9)=0.001
               endif
              er(1:kBot(i,j),10) = PH(i,j,1:kBot(i,j),bi,bj) ! from BFMcoupler_VAR.h
+             er(1:kBot(i,j),11) = 0.0
 
 c  ===== CALL TO BFM ====
              CALL BFM1D_Input_EcologyDynamics(kBot(i,j),a,jptra,er)
