@@ -232,7 +232,7 @@ NEW_LINES=[
 "        ENDDO",
 "        ENDDO",
 "       ENDIF",
-"#endif /* ALLOW_BFMCOUPLER */"
+"#endif /* ALLOW_BFMCOUPLER */",
 "#endif /* ALLOW_LONGSTEP */"]
 
 
