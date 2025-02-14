@@ -107,11 +107,11 @@ class BFM_vars(object):
     def flush(self):
 
         print('Vars:\n')
-        print self._vars
+        print(self._vars)
         print('\nDiagnostic variables:\n')
-        print self._diag_vars
+        print(self._diag_vars)
         print('\nDiagnostic variables - MITgcm-BFM-only:\n')
-        print self._diag_vars_MIT
+        print(self._diag_vars_MIT)
 
 
 
