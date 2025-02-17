@@ -59,7 +59,8 @@ def addsep(string):
 
 
 
-def insert_lines(orig_lines,NEW_LINES,position_line,nLINES,final=False):
+def insert_lines(orig_lines,NEW_LINES,position_line,final=False):
+    nLINES=len(orig_lines)
     OUTLINES=[]
     for iline in range(position_line):
         OUTLINES.append(orig_lines[iline])
@@ -71,20 +72,33 @@ def insert_lines(orig_lines,NEW_LINES,position_line,nLINES,final=False):
     if final:
         OUTLINES=[line + "\n" for line in OUTLINES]
     return OUTLINES
-def replace_lines(orig_lines, old, new_lines):
+def replace_lines(orig_lines, searchstring, new_lines):
+    assert len(orig_lines)>0
     OUTLINES=[]
     found=False
     for line in orig_lines:
-        if line.find(old) > -1 :
+        if line.find(searchstring) > -1 :
             found = True
             for dest_line in new_lines:
                 OUTLINES.append(dest_line + "\n")
         else:
             OUTLINES.append(line)
     if not found :
-        print(old, "Not found")
-        return None
+        raise ValueError(searchstring + " Not found")
     return OUTLINES
+
+def get_position_and_strings_on_file(filename, searchstring:str):
+    LINES=file2stringlist(infile)
+    for iline, line in enumerate(LINES):
+        if line.find(searchstring) >-1: position_line=iline
+    else:
+        raise ValueError(f"{searchstring} not found in {filename}")
+    return LINES, position_line
+
+def get_position_on_strings(string_list, searchstring:str) -> int:
+    for iline, line in enumerate(string_list):
+        if line.find(searchstring) >-1: position_line=iline
+    return position_line
 
 INPUTDIR=addsep(args.inputdir)
 OUTDIR=addsep(args.outdir)
@@ -96,121 +110,107 @@ filename="gchem_init_vari.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
-LINES=file2stringlist(infile)
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("INTERFACE: ==") >-1: position_line=iline
+LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* ALLOW_GCHEM */")
+LINES, position_line = get_position_and_strings_on_file(infile, "INTERFACE: ==")
    
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "#include \"BFMcoupler_OPTIONS.h\"",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
 
 LINES=OUTLINES
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("#endif /* ALLOW_GCHEM */") >-1: position_line=iline
+position_line=get_position_on_strings(LINES, "#endif /* ALLOW_GCHEM */")
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "      IF ( useBFMcoupler) THEN",
 "         CALL BFMcoupler_INI_FORCING(myThid)",
 "      ENDIF",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()
-
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
 
 
 
 filename="gchem_init_fixed.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES=file2stringlist(infile)
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("#ifdef ALLOW_DIAGNOSTICS") >-1: position_line=iline
+LINES, position_line = get_position_and_strings_on_file(infile, "#ifdef ALLOW_DIAGNOSTICS")
+
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "         call BFMcoupler_INIT_FIXED(myThid)",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
+
 
 
 filename="gchem_fields_load.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES=file2stringlist(infile)
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("#endif /* ALLOW_GCHEM */") >-1: position_line=iline
+LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* ALLOW_GCHEM */")
+
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "      IF ( useBFMcoupler ) THEN",
 "       CALl BFMcoupler_FIELDS_LOAD(myIter,myTime,myThid)",
 "      ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
+
 
 
 filename="gchem_readparms.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
-LINES=file2stringlist(infile)
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("NAMELIST /GCHEM_PARM01/") >-1: position_line=iline+1
+LINES, position_line = get_position_and_strings_on_file(infile,"#endif /* ALLOW_GCHEM */")
+LINES, position_line = get_position_and_strings_on_file(infile,"C Set defaults values for parameters in GCHEM.h")
+LINES, position_line = get_position_and_strings_on_file(infile,"NAMELIST /GCHEM_PARM01/")
+
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",   
 "c                 useBFMcoupler must be read in namelist",
 "     &            useBFMcoupler,",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 
 LINES=OUTLINES
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("C Set defaults values for parameters in GCHEM.h") >-1: position_line=iline+1
+position_line = get_position_on_strings(LINES, "C Set defaults values for parameters in GCHEM.h")
+
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "       useBFMcoupler = .FALSE.",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 
 LINES=OUTLINES
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("#endif /* ALLOW_GCHEM */")>-1: position_line=iline
+position_line = get_position_on_strings(LINES, "#endif /* ALLOW_GCHEM */")
+
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "      IF ( useBFMcoupler ) THEN",
 "        CALL BFMcoupler_READPARMS(myThid)",
 "      ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]     
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
 
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
+
 
 
 filename="gchem_calc_tendency.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
-LINES=file2stringlist(infile)
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("#ifdef ALLOW_AUTODIFF")>-1: position_line=iline
+LINES, position_line = get_position_and_strings_on_file(infile, "#ifdef ALLOW_AUTODIFF")
+
 NEW_LINES=[
 "C------------------------",
 "C BFM coupler           |",
@@ -236,25 +236,24 @@ NEW_LINES=[
 "#endif /* ALLOW_LONGSTEP */"]
 
 
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=False)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=False)
 LINES=OUTLINES
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("# ifndef GCHEM_SEPARATE_FORCING")>-1: position_line=iline
+position_line = get_position_on_strings(LINES, "# ifndef GCHEM_SEPARATE_FORCING")
+
 NEW_LINES=["# ifndef ALLOW_LONGSTEP"]
-nLINES = len(LINES)
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()
+
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
+
 
 
 outfile=MYCODE + 'longstep_gchem_calc_tendency.F'
 LINES=OUTLINES # we'll apply changes from gchem_calc_tendency.F
 
-l0="C $Header: /u/gcmpack/MITgcm/pkg/gchem/gchem_calc_tendency.F,v 1.5 2013/06/10 02:52:57 jmc Exp $"
-l1="C $Header: longstep_gchem_calc_tendency.F,v 1.5 2015/04/01 02:52:57 GPC Exp $"
-OUTLINES = replace_lines(LINES,l0,[l1])
+#l0="C $Header: /u/gcmpack/MITgcm/pkg/gchem/gchem_calc_tendency.F,v 1.5 2013/06/10 02:52:57 jmc Exp $"
+#l1="C $Header: longstep_gchem_calc_tendency.F,v 1.5 2015/04/01 02:52:57 GPC Exp $"
+#OUTLINES = replace_lines(LINES,l0,[l1])
 
 l0="C !ROUTINE: GCHEM_CALC_TENDENCY"
 l1="C !ROUTINE: LONGSTEP_GCHEM_CALC_TENDENCY"
@@ -270,9 +269,9 @@ l0 = "# ifndef ALLOW_LONGSTEP"
 l1 = "# ifdef ALLOW_LONGSTEP"
 OUTLINES = replace_lines(OUTLINES,l0,[l1] )
 
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
+
 
 
 
@@ -281,45 +280,39 @@ fid.close()
 filename="GCHEM.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES=file2stringlist(infile)
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("C     useDARWIN :: flag to turn on/off darwin pkg")>-1: position_line=iline+1
+LINES, position_line = get_position_and_strings_on_file(infile,"     &              useDARWIN")
+LINES, position_line = get_position_and_strings_on_file(infile, "C     useDARWIN :: flag to turn on/off darwin pkg")
+
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "C     useBFMcoupler :: flag to turn on/off BFMcoupler pkg",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 LINES=OUTLINES
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("     &              useDARWIN")>-1: position_line=iline
+position_line = get_position_on_strings(LINES, "     &              useDARWIN")
+
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "     &              ,useBFMcoupler",
 "      LOGICAL useBFMcoupler",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1,nLINES,final=True)
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1,final=True)
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
 
 
 filename="GCHEM_OPTIONS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES=file2stringlist(infile)
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("#endif /* ALLOW_GCHEM */")>-1: position_line=iline
+
+LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* ALLOW_GCHEM */")
 NEW_LINES=[
 "#undef GCHEM_SEPARATE_FORCING",
 "c undefining gchem_separate_forcing actives BFMcoupler_calc_tendency and add_tendency",
 "c  #define GCHEM_SEPARATE_FORCING"]    
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()    
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
     
 
 ##### applying differences in longstep Pkg
@@ -327,19 +320,16 @@ MITCODE=INPUTDIR + "pkg/longstep/"
 filename="longstep_thermodynamics.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES=file2stringlist(infile)
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("      IF ( LS_doTimeStep ) THEN")>-1: position_line=iline+1
+LINES, position_line = get_position_and_strings_on_file(infile, "      IF ( LS_doTimeStep ) THEN")
+
 NEW_LINES=[
 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
 "c CGP 2015/04/03 adding call to gchem_calc_tendency",
 "      CALL LONGSTEP_GCHEM_CALC_TENDENCY( myTime, myIter, myThid )",
 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()    
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
     
 
 ##### applying differences in ptracer Pkg
@@ -347,19 +337,17 @@ MITCODE=INPUTDIR + "pkg/ptracers/"
 filename="ptracers_reset.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES=file2stringlist(infile)
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("C     !INPUT PARAMETERS:")>-1: position_line=iline
+LINES, position_line = get_position_and_strings_on_file(infile,"     DO iTracer = 1, PTRACERS_num")
+LINES, position_line = get_position_and_strings_on_file(infile, "C     !INPUT PARAMETERS:")
+
 NEW_LINES=[
 "#ifdef ALLOW_GCHEM",
 "#include \"GCHEM.h\"",
 "#endif"]  
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
 LINES=OUTLINES
-nLINES=len(LINES)
-for iline, line in enumerate(LINES):
-    if line.find("     DO iTracer = 1, PTRACERS_num")>-1:position_line=iline+1 
+position_line = get_position_on_strings(LINES, "     DO iTracer = 1, PTRACERS_num")
+
 NEW_LINES=[
 "c check for negative values of pTracer variables and set them to 1._d-10",
 "#ifdef ALLOW_GCHEM",
@@ -383,10 +371,9 @@ NEW_LINES=[
 "#endif /* BFMCOUPLER */",
 "      ENDIF",
 "#endif /* ALLOW_GCHEM */ "]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()    
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1,final=True)
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
 
 
 
@@ -394,35 +381,17 @@ filename="GCHEM_FIELDS.h"
 MITCODE=INPUTDIR + "pkg/gchem/"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES=file2stringlist(infile)
-nLINES = len(LINES)
 
-for iline, line in enumerate(LINES):
-    if line.find("#endif /* GCHEM_SEPARATE_FORCING */")>-1: position_line=iline
+LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* GCHEM_SEPARATE_FORCING */")
 NEW_LINES=["#ifdef GCHEM_SEPARATE_FORCING",
 "      _RL gchemTendency(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy,",
 "     &                  PTRACERS_num)",
 "      COMMON /GCHEM_FIELDS/",
 "     &     gchemTendency",
 "#endif /* when define GCHEM_SEPARATE_FORCING */"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,nLINES,final=True)
-fid=open(outfile,'w')
-fid.writelines(OUTLINES)
-fid.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
 
 
 
