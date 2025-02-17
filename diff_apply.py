@@ -210,7 +210,7 @@ outfile=MYCODE + filename
 LINES=file2stringlist(infile)
 nLINES=len(LINES)
 for iline, line in enumerate(LINES):
-    if line.find("# endif /* GCHEM_SEPARATE_FORCING */")>-1: position_line=iline
+    if line.find("#ifdef ALLOW_AUTODIFF")>-1: position_line=iline
 NEW_LINES=[
 "C------------------------",
 "C BFM coupler           |",
