@@ -90,7 +90,9 @@ def replace_lines(orig_lines, searchstring, new_lines):
 def get_position_and_strings_on_file(filename, searchstring:str):
     LINES=file2stringlist(infile)
     for iline, line in enumerate(LINES):
-        if line.find(searchstring) >-1: position_line=iline
+        if line.find(searchstring) >-1:
+            position_line=iline
+            break
     else:
         raise ValueError(f"{searchstring} not found in {filename}")
     return LINES, position_line
@@ -110,7 +112,7 @@ filename="gchem_init_vari.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
-LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* ALLOW_GCHEM */")
+LINES, position_line = get_position_and_strings_on_file(infile, "C !LOCAL VARIABLES")
 LINES, position_line = get_position_and_strings_on_file(infile, "INTERFACE: ==")
    
 NEW_LINES=[
@@ -120,7 +122,7 @@ NEW_LINES=[
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
 
 LINES=OUTLINES
-position_line=get_position_on_strings(LINES, "#endif /* ALLOW_GCHEM */")
+position_line=get_position_on_strings(LINES, "C !LOCAL VARIABLES")
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "      IF ( useBFMcoupler) THEN",
@@ -169,8 +171,8 @@ filename="gchem_readparms.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
+LINES, position_line = get_position_and_strings_on_file(infile,"C- Set defaults values for parameters in GCHEM.h")
 LINES, position_line = get_position_and_strings_on_file(infile,"#endif /* ALLOW_GCHEM */")
-LINES, position_line = get_position_and_strings_on_file(infile,"C Set defaults values for parameters in GCHEM.h")
 LINES, position_line = get_position_and_strings_on_file(infile,"NAMELIST /GCHEM_PARM01/")
 
 NEW_LINES=[
@@ -181,7 +183,7 @@ NEW_LINES=[
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 
 LINES=OUTLINES
-position_line = get_position_on_strings(LINES, "C Set defaults values for parameters in GCHEM.h")
+position_line = get_position_on_strings(LINES, "C- Set defaults values for parameters in GCHEM.h")
 
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
@@ -208,7 +210,7 @@ with open(outfile,'w') as fid:
 filename="gchem_calc_tendency.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-
+LINES, position_line = get_position_and_strings_on_file(infile, "C !LOCAL VARIABLES")
 LINES, position_line = get_position_and_strings_on_file(infile, "#ifdef ALLOW_AUTODIFF")
 
 NEW_LINES=[
@@ -238,11 +240,11 @@ NEW_LINES=[
 
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=False)
 LINES=OUTLINES
-position_line = get_position_on_strings(LINES, "# ifndef GCHEM_SEPARATE_FORCING")
+position_line = get_position_on_strings(LINES, "C !LOCAL VARIABLES")
 
 NEW_LINES=["# ifndef ALLOW_LONGSTEP"]
 
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line-1,final=True)
 with open(outfile,'w') as fid:
     fid.writelines(OUTLINES)
 
@@ -376,13 +378,12 @@ with open(outfile,'w') as fid:
     fid.writelines(OUTLINES)
 
 
-
-filename="GCHEM_FIELDS.h"
 MITCODE=INPUTDIR + "pkg/gchem/"
+filename="GCHEM_FIELDS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
-LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* GCHEM_SEPARATE_FORCING */")
+LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* GCHEM_ADD2TR_TENDENCY */")
 NEW_LINES=["#ifdef GCHEM_SEPARATE_FORCING",
 "      _RL gchemTendency(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy,",
 "     &                  PTRACERS_num)",
