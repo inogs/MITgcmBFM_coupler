@@ -60,6 +60,9 @@ def addsep(string):
 
 
 def insert_lines(orig_lines,NEW_LINES,position_line,final=False):
+    """
+    Insert NEW_LINES in orig_lines after position_line
+    """
     nLINES=len(orig_lines)
     OUTLINES=[]
     for iline in range(position_line):
@@ -73,6 +76,9 @@ def insert_lines(orig_lines,NEW_LINES,position_line,final=False):
         OUTLINES=[line + "\n" for line in OUTLINES]
     return OUTLINES
 def replace_lines(orig_lines, searchstring, new_lines):
+    """
+    Replaces searchstring with new_lines
+    """
     assert len(orig_lines)>0
     OUTLINES=[]
     found=False
@@ -393,6 +399,3 @@ NEW_LINES=["#ifdef GCHEM_SEPARATE_FORCING",
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
 with open(outfile,'w') as fid:
     fid.writelines(OUTLINES)
-
-
-
