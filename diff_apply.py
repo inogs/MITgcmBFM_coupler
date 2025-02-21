@@ -271,9 +271,6 @@ dumpfile(outfile, OUTLINES)
 outfile=MYCODE + 'longstep_gchem_calc_tendency.F'
 LINES=OUTLINES # we'll apply changes from gchem_calc_tendency.F
 
-#l0="C $Header: /u/gcmpack/MITgcm/pkg/gchem/gchem_calc_tendency.F,v 1.5 2013/06/10 02:52:57 jmc Exp $"
-#l1="C $Header: longstep_gchem_calc_tendency.F,v 1.5 2015/04/01 02:52:57 GPC Exp $"
-#OUTLINES = replace_lines(LINES,l0,[l1])
 
 l0="C !ROUTINE: GCHEM_CALC_TENDENCY"
 l1="C !ROUTINE: LONGSTEP_GCHEM_CALC_TENDENCY"
