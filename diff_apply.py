@@ -91,7 +91,7 @@ def replace_lines(orig_lines, searchstring, new_lines):
         if line.find(searchstring) > -1 :
             found = True
             for dest_line in new_lines:
-                OUTLINES.append(dest_line + "\n")
+                OUTLINES.append(dest_line)
         else:
             OUTLINES.append(line)
     if not found :
@@ -209,7 +209,7 @@ NEW_LINES=[
 "      ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]     
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
-dumpfile,outfile,OUTLINES)
+dumpfile(outfile,OUTLINES)
 
 
 
@@ -411,7 +411,7 @@ dumpfile(outfile, OUTLINES)
 
 
 MITCODE=INPUTDIR + "pkg/diagnostics/"
-filename="DIAGNOSTIC_SIZE.h"
+filename="DIAGNOSTICS_SIZE.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 LINES, position_line = strings_and_position(infile, "PARAMETER( ndiagMax = 500 )")
@@ -428,5 +428,19 @@ OUTLINES = replace_lines(LINES,"PARAMETER( diagSt_size = 10*Nr )", ["PARAMETER( 
 dumpfile(outfile, OUTLINES)
 
 
-
+MITCODE=INPUTDIR + "model/src/"
+filename="cg2d.F"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"WRITE(standardmessageunit")
+LINES=replace_lines(LINES,"WRITE(standardmessageunit", ["C"])
+LINES=replace_lines(LINES," cg2d: Sum(rhs),rhsMax = ",["C"])
+dumpfile(outfile,LINES)
+filename="cg3d.F"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"WRITE(standardmessageunit")
+LINES = replace_lines(LINES,"WRITE(standardmessageunit",[ "C"])
+LINES = replace_lines(LINES," cg3d: Sum(rhs),rhsMax = ",["C"])
+dumpfile(outfile,LINES)
 
