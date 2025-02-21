@@ -59,9 +59,13 @@ def addsep(string):
     else:
         return  string
 
+def dumpfile(filename,string_list):
+    outlines=[line + "\n" for line in string_list]
+    with open(filename,'w') as fid:
+        fid.writelines(outlines)
+    print(filename)
 
-
-def insert_lines(orig_lines,NEW_LINES,position_line,final=False):
+def insert_lines(orig_lines,NEW_LINES,position_line):
     """
     Insert NEW_LINES in orig_lines after position_line
     """
@@ -74,9 +78,8 @@ def insert_lines(orig_lines,NEW_LINES,position_line,final=False):
 
     for iline in range(position_line,nLINES):
         OUTLINES.append(orig_lines[iline])
-    if final:
-        OUTLINES=[line + "\n" for line in OUTLINES]
     return OUTLINES
+
 def replace_lines(orig_lines, searchstring, new_lines):
     """
     Replaces searchstring with new_lines
@@ -137,9 +140,8 @@ NEW_LINES=[
 "         CALL BFMcoupler_INI_FORCING(myThid)",
 "      ENDIF",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+dumpfile(outfile, OUTLINES)
 
 
 
@@ -152,9 +154,8 @@ NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "         call BFMcoupler_INIT_FIXED(myThid)",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+dumpfile(outfile, OUTLINES)
 
 
 
@@ -169,9 +170,8 @@ NEW_LINES=[
 "       CALl BFMcoupler_FIELDS_LOAD(myIter,myTime,myThid)",
 "      ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+dumpfile(outfile, OUTLINES)
 
 
 
@@ -208,10 +208,8 @@ NEW_LINES=[
 "        CALL BFMcoupler_READPARMS(myThid)",
 "      ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]     
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
-
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+dumpfile,outfile,OUTLINES)
 
 
 
@@ -246,15 +244,14 @@ NEW_LINES=[
 "#endif /* ALLOW_LONGSTEP */"]
 
 
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=False)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
 LINES=OUTLINES
 position_line = get_position_on_strings(LINES, "C !LOCAL VARIABLES")
 
 NEW_LINES=["# ifndef ALLOW_LONGSTEP"]
 
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line-1,final=True)
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line-1)
+dumpfile(outfile, OUTLINES)
 
 
 
@@ -278,9 +275,7 @@ OUTLINES = replace_lines(OUTLINES,l0, l1 )
 l0 = "# ifndef ALLOW_LONGSTEP"
 l1 = "# ifdef ALLOW_LONGSTEP"
 OUTLINES = replace_lines(OUTLINES,l0,[l1] )
-
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+dumpfile(outfile, OUTLINES)
 
 
 
@@ -306,9 +301,8 @@ NEW_LINES=[
 "     &              ,useBFMcoupler",
 "      LOGICAL useBFMcoupler",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1,final=True)
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+dumpfile(outfile, OUTLINES)
 
 
 filename="GCHEM_OPTIONS.h"
@@ -322,9 +316,8 @@ NEW_LINES=[
 "c  #define GCHEM_SEPARATE_FORCING"]    
 LINES=insert_lines(LINES, NEW_LINES, position_line)
 LINES = replace_lines(LINES, "#undef GCHEM_ADD2TR_TENDENCY", ["#define GCHEM_ADD2TR_TENDENCY"])
-OUTLINES = insert_lines(LINES,"",0,finale=True)
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES = insert_lines(LINES,"",0)
+dumpfile(outfile, OUTLINES)
     
 
 ##### applying differences in longstep Pkg
@@ -339,9 +332,8 @@ NEW_LINES=[
 "c CGP 2015/04/03 adding call to gchem_calc_tendency",
 "      CALL LONGSTEP_GCHEM_CALC_TENDENCY( myTime, myIter, myThid )",
 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+dumpfile(outfile, OUTLINES)
     
 
 ##### applying differences in ptracer Pkg
@@ -383,9 +375,8 @@ NEW_LINES=[
 "#endif /* BFMCOUPLER */",
 "      ENDIF",
 "#endif /* ALLOW_GCHEM */ "]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1,final=True)
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+dumpfile(outfile, OUTLINES)
 
 
 MITCODE=INPUTDIR + "pkg/gchem/"
@@ -400,9 +391,8 @@ NEW_LINES=["#ifdef GCHEM_SEPARATE_FORCING",
 "      COMMON /GCHEM_FIELDS/",
 "     &     gchemTendency",
 "#endif /* when define GCHEM_SEPARATE_FORCING */"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+dumpfile(outfile, OUTLINES)
 
 
 MITCODE=INPUTDIR + "pkg/obcs/"
@@ -416,8 +406,7 @@ LINES, position_line = strings_and_position(infile, "#undef ALLOW_OBCS_TIDES")
 LINES = replace_lines(LINES, "#define ALLOW_ORLANSKI", ["#undef ALLOW_ORLANSKI"])
 LINES = replace_lines(LINES, "#undef ALLOW_OBCS_SPONGE", ["#define ALLOW_OBCS_SPONGE"])
 OUTLINES = replace_lines(LINES,"#undef ALLOW_OBCS_TIDES", ["#define ALLOW_OBCS_TIDES"])
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+dumpfile(outfile, OUTLINES)
 
 
 
@@ -436,8 +425,7 @@ LINES = replace_lines(LINES, "PARAMETER( ndiagMax = 500 )", ["PARAMETER( ndiagMa
 LINES = replace_lines(LINES, longstr_src, longstr_dest)
 LINES = replace_lines(LINES,"PARAMETER( numDiags = 1*Nr )", ["PARAMETER( numDiags = 150*Nr )"])
 OUTLINES = replace_lines(LINES,"PARAMETER( diagSt_size = 10*Nr )", ["PARAMETER( diagSt_size = 150*Nr )"])
-with open(outfile,'w') as fid:
-    fid.writelines(OUTLINES)
+dumpfile(outfile, OUTLINES)
 
 
 
