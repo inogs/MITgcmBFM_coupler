@@ -93,6 +93,7 @@ def replace_lines(orig_lines, searchstring, new_lines):
     Replaces searchstring with new_lines
     """
     assert len(orig_lines)>0
+    assert isinstance(new_lines,list)
     OUTLINES=[]
     found=False
     for line in orig_lines:
@@ -136,7 +137,7 @@ infile=MITCODE + filename
 outfile=MYCODE + filename
 
 LINES, position_line = strings_and_position(infile, "C !LOCAL VARIABLES")
-LINES, position_line = strings_and_position(infile, "INTERFACE: ==")
+LINES, position_line = strings_and_position(infile, "Initialise GCHEM variables:")
    
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
@@ -145,14 +146,14 @@ NEW_LINES=[
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
 
 LINES=OUTLINES
-position_line=get_position_on_strings(LINES, "C !LOCAL VARIABLES")
+position_line=get_position_on_strings(LINES, "ifdef GCHEM_ADD2TR_TENDENCY")
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
 "      IF ( useBFMcoupler) THEN",
 "         CALL BFMcoupler_INI_FORCING(myThid)",
 "      ENDIF",
 "#endif"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line-1)
 dumpfile(outfile, OUTLINES)
 
 
@@ -428,15 +429,15 @@ infile=MITCODE + filename
 outfile=MYCODE + filename
 LINES, position_line = strings_and_position(infile, "PARAMETER( ndiagMax = 500 )")
 longstr_src  = "PARAMETER( numlists = 10, numperlist = 50, numLevels=2*Nr )"
-longstr_dest = "PARAMETER( numlists = 150, numperlist = 150, numLevels=2*Nr )"
+longstr_dest = "       PARAMETER( numlists = 150, numperlist = 150, numLevels=2*Nr )"
 LINES, position_line = strings_and_position(infile, longstr_src)
 LINES, position_line = strings_and_position(infile, "PARAMETER( numDiags = 1*Nr )")
 LINES, position_line = strings_and_position(infile, "PARAMETER( diagSt_size = 10*Nr )")
 
-LINES = replace_lines(LINES, "PARAMETER( ndiagMax = 500 )", ["PARAMETER( ndiagMax = 1500 )"])
-LINES = replace_lines(LINES, longstr_src, longstr_dest)
-LINES = replace_lines(LINES,"PARAMETER( numDiags = 1*Nr )", ["PARAMETER( numDiags = 150*Nr )"])
-OUTLINES = replace_lines(LINES,"PARAMETER( diagSt_size = 10*Nr )", ["PARAMETER( diagSt_size = 150*Nr )"])
+LINES = replace_lines(LINES, "PARAMETER( ndiagMax = 500 )", ["       PARAMETER( ndiagMax = 1500 )"])
+LINES = replace_lines(LINES, longstr_src, [longstr_dest])
+LINES = replace_lines(LINES,"PARAMETER( numDiags = 1*Nr )", ["       PARAMETER( numDiags = 150*Nr )"])
+OUTLINES = replace_lines(LINES,"PARAMETER( diagSt_size = 10*Nr )", ["       PARAMETER( diagSt_size = 150*Nr )"])
 dumpfile(outfile, OUTLINES)
 
 
@@ -471,7 +472,7 @@ filename="RBCS_SIZE.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 LINES, position_line = strings_and_position(infile, "PARAMETER( maskLEN = 3 )")
-LINES = replace_lines(LINES, "PARAMETER( maskLEN = 3 )" ,["PARAMETER( maskLEN = 53 )"] )
+LINES = replace_lines(LINES, "PARAMETER( maskLEN = 3 )" ,["       PARAMETER( maskLEN = 53 )"] )
 dumpfile(outfile,LINES)
 
 MITCODE = INPUTDIR + "model/inc/"
