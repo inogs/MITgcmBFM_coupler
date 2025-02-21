@@ -33,6 +33,7 @@ C !USES: ===============================================================
 #include "PTRACERS_SIZE.h"
 #include "PTRACERS_PARAMS.h"
 #include "GCHEM_OPTIONS.h"
+#include "GCHEM_SIZE.h"
 #include "PTRACERS_FIELDS.h"
 #include "GCHEM_FIELDS.h"
 #include "EXF_FIELDS.h"
