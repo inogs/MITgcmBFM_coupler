@@ -32,6 +32,7 @@ C !USES: ===============================================================
 #include "BFMcoupler_VARS.h" ! contains #include "BFM_var_list.h"
 #include "PTRACERS_SIZE.h"
 #include "PTRACERS_PARAMS.h"
+#include "GCHEM_OPTIONS.h"
 #include "PTRACERS_FIELDS.h"
 #include "GCHEM_FIELDS.h"
 #include "EXF_FIELDS.h"
