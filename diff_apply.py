@@ -95,7 +95,7 @@ def replace_lines(orig_lines, searchstring, new_lines):
         raise ValueError(searchstring + " Not found")
     return OUTLINES
 
-def get_position_and_strings_on_file(filename, searchstring:str):
+def strings_and_position(filename, searchstring:str):
     LINES=file2stringlist(infile)
     for iline, line in enumerate(LINES):
         if line.find(searchstring) >-1:
@@ -120,8 +120,8 @@ filename="gchem_init_vari.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
-LINES, position_line = get_position_and_strings_on_file(infile, "C !LOCAL VARIABLES")
-LINES, position_line = get_position_and_strings_on_file(infile, "INTERFACE: ==")
+LINES, position_line = strings_and_position(infile, "C !LOCAL VARIABLES")
+LINES, position_line = strings_and_position(infile, "INTERFACE: ==")
    
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
@@ -146,7 +146,7 @@ with open(outfile,'w') as fid:
 filename="gchem_init_fixed.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = get_position_and_strings_on_file(infile, "#ifdef ALLOW_DIAGNOSTICS")
+LINES, position_line = strings_and_position(infile, "#ifdef ALLOW_DIAGNOSTICS")
 
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
@@ -161,7 +161,7 @@ with open(outfile,'w') as fid:
 filename="gchem_fields_load.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* ALLOW_GCHEM */")
+LINES, position_line = strings_and_position(infile, "#endif /* ALLOW_GCHEM */")
 
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
@@ -179,9 +179,9 @@ filename="gchem_readparms.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
-LINES, position_line = get_position_and_strings_on_file(infile,"C- Set defaults values for parameters in GCHEM.h")
-LINES, position_line = get_position_and_strings_on_file(infile,"#endif /* ALLOW_GCHEM */")
-LINES, position_line = get_position_and_strings_on_file(infile,"NAMELIST /GCHEM_PARM01/")
+LINES, position_line = strings_and_position(infile,"C- Set defaults values for parameters in GCHEM.h")
+LINES, position_line = strings_and_position(infile,"#endif /* ALLOW_GCHEM */")
+LINES, position_line = strings_and_position(infile,"NAMELIST /GCHEM_PARM01/")
 
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",   
@@ -218,8 +218,8 @@ with open(outfile,'w') as fid:
 filename="gchem_calc_tendency.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = get_position_and_strings_on_file(infile, "C !LOCAL VARIABLES")
-LINES, position_line = get_position_and_strings_on_file(infile, "#ifdef ALLOW_AUTODIFF")
+LINES, position_line = strings_and_position(infile, "C !LOCAL VARIABLES")
+LINES, position_line = strings_and_position(infile, "#ifdef ALLOW_AUTODIFF")
 
 NEW_LINES=[
 "C------------------------",
@@ -290,8 +290,8 @@ with open(outfile,'w') as fid:
 filename="GCHEM.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = get_position_and_strings_on_file(infile,"     &              useDARWIN")
-LINES, position_line = get_position_and_strings_on_file(infile, "C     useDARWIN :: flag to turn on/off darwin pkg")
+LINES, position_line = strings_and_position(infile,"     &              useDARWIN")
+LINES, position_line = strings_and_position(infile, "C     useDARWIN :: flag to turn on/off darwin pkg")
 
 NEW_LINES=[
 "#ifdef ALLOW_BFMCOUPLER",
@@ -315,7 +315,7 @@ filename="GCHEM_OPTIONS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
-LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* ALLOW_GCHEM */")
+LINES, position_line = strings_and_position(infile, "#endif /* ALLOW_GCHEM */")
 NEW_LINES=[
 "#undef GCHEM_SEPARATE_FORCING",
 "c undefining gchem_separate_forcing actives BFMcoupler_calc_tendency and add_tendency",
@@ -332,7 +332,7 @@ MITCODE=INPUTDIR + "pkg/longstep/"
 filename="longstep_thermodynamics.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = get_position_and_strings_on_file(infile, "      IF ( LS_doTimeStep ) THEN")
+LINES, position_line = strings_and_position(infile, "      IF ( LS_doTimeStep ) THEN")
 
 NEW_LINES=[
 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
@@ -349,8 +349,8 @@ MITCODE=INPUTDIR + "pkg/ptracers/"
 filename="ptracers_reset.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = get_position_and_strings_on_file(infile,"     DO iTracer = 1, PTRACERS_num")
-LINES, position_line = get_position_and_strings_on_file(infile, "C     !INPUT PARAMETERS:")
+LINES, position_line = strings_and_position(infile,"     DO iTracer = 1, PTRACERS_num")
+LINES, position_line = strings_and_position(infile, "C     !INPUT PARAMETERS:")
 
 NEW_LINES=[
 "#ifdef ALLOW_GCHEM",
@@ -393,7 +393,7 @@ filename="GCHEM_FIELDS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
-LINES, position_line = get_position_and_strings_on_file(infile, "#endif /* GCHEM_ADD2TR_TENDENCY */")
+LINES, position_line = strings_and_position(infile, "#endif /* GCHEM_ADD2TR_TENDENCY */")
 NEW_LINES=["#ifdef GCHEM_SEPARATE_FORCING",
 "      _RL gchemTendency(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy,",
 "     &                  PTRACERS_num)",
@@ -409,9 +409,9 @@ MITCODE=INPUTDIR + "pkg/obcs/"
 filename="OBCS_OPTIONS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = get_position_and_strings_on_file(infile, "#define ALLOW_ORLANSKI")
-LINES, position_line = get_position_and_strings_on_file(infile, "#undef ALLOW_OBCS_SPONGE")
-LINES, position_line = get_position_and_strings_on_file(infile, "#undef ALLOW_OBCS_TIDES")
+LINES, position_line = strings_and_position(infile, "#define ALLOW_ORLANSKI")
+LINES, position_line = strings_and_position(infile, "#undef ALLOW_OBCS_SPONGE")
+LINES, position_line = strings_and_position(infile, "#undef ALLOW_OBCS_TIDES")
 
 LINES = replace_lines(LINES, "#define ALLOW_ORLANSKI", ["#undef ALLOW_ORLANSKI"])
 LINES = replace_lines(LINES, "#undef ALLOW_OBCS_SPONGE", ["#define ALLOW_OBCS_SPONGE"])
@@ -425,12 +425,12 @@ MITCODE=INPUTDIR + "pkg/diagnostics/"
 filename="DIAGNOSTIC_SIZE.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = get_position_and_strings_on_file(infile, "PARAMETER( ndiagMax = 500 )")
+LINES, position_line = strings_and_position(infile, "PARAMETER( ndiagMax = 500 )")
 longstr_src  = "PARAMETER( numlists = 10, numperlist = 50, numLevels=2*Nr )"
 longstr_dest = "PARAMETER( numlists = 150, numperlist = 150, numLevels=2*Nr )"
-LINES, position_line = get_position_and_strings_on_file(infile, longstr_src)
-LINES, position_line = get_position_and_strings_on_file(infile, "PARAMETER( numDiags = 1*Nr )")
-LINES, position_line = get_position_and_strings_on_file(infile, "PARAMETER( diagSt_size = 10*Nr )")
+LINES, position_line = strings_and_position(infile, longstr_src)
+LINES, position_line = strings_and_position(infile, "PARAMETER( numDiags = 1*Nr )")
+LINES, position_line = strings_and_position(infile, "PARAMETER( diagSt_size = 10*Nr )")
 
 LINES = replace_lines(LINES, "PARAMETER( ndiagMax = 500 )", ["PARAMETER( ndiagMax = 1500 )"])
 LINES = replace_lines(LINES, longstr_src, longstr_dest)
@@ -438,5 +438,7 @@ LINES = replace_lines(LINES,"PARAMETER( numDiags = 1*Nr )", ["PARAMETER( numDiag
 OUTLINES = replace_lines(LINES,"PARAMETER( diagSt_size = 10*Nr )", ["PARAMETER( diagSt_size = 150*Nr )"])
 with open(outfile,'w') as fid:
     fid.writelines(OUTLINES)
+
+
 
 
