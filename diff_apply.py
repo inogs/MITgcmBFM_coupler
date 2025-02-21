@@ -21,7 +21,6 @@ def argument():
    cg3d.F
    PTRACERS_SIZE.h
    RBCS_SIZE.h
-   
 
    by reading from MITgcm code
 '''
@@ -121,6 +120,10 @@ def get_position_on_strings(string_list, searchstring:str) -> int:
     for iline, line in enumerate(string_list):
         if line.find(searchstring) >-1: position_line=iline
     return position_line
+
+
+print("")
+print("----------   Applying patch   -------------------")
 
 INPUTDIR=addsep(args.inputdir)
 OUTDIR=addsep(args.outdir)
@@ -470,4 +473,26 @@ outfile=MYCODE + filename
 LINES, position_line = strings_and_position(infile, "PARAMETER( maskLEN = 3 )")
 LINES = replace_lines(LINES, "PARAMETER( maskLEN = 3 )" ,["PARAMETER( maskLEN = 53 )"] )
 dumpfile(outfile,LINES)
+
+MITCODE = INPUTDIR + "model/inc/"
+filename="CPP_OPTIONS.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+infile=MITCODE + filename
+LINES, position_line = strings_and_position(infile,"#undef SHORTWAVE_HEATING")
+
+LINES = replace_lines(LINES,"#undef SHORTWAVE_HEATING", ["#define SHORTWAVE_HEATING"])
+LINES = replace_lines(LINES,"#undef ALLOW_3D_DIFFKR", ["#define ALLOW_3D_DIFFKR"])
+LINES = replace_lines(LINES,"#undef ALLOW_ADAMSBASHFORTH_3", ["#define ALLOW_ADAMSBASHFORTH_3"])
+LINES = replace_lines(LINES,"#undef ALLOW_NONHYDROSTATIC", ["#define ALLOW_NONHYDROSTATIC"])
+LINES = replace_lines(LINES,"#undef ALLOW_FRICTION_HEATING", ["#define ALLOW_FRICTION_HEATING"])
+LINES = replace_lines(LINES,"#undef ALLOW_ADDFLUID", ["#define ALLOW_ADDFLUID"])
+LINES = replace_lines(LINES,"#undef EXCLUDE_FFIELDS_LOAD", ["#define EXCLUDE_FFIELDS_LOAD"])
+LINES = replace_lines(LINES,"#define ALLOW_SRCG", ["#undef ALLOW_SRCG"])
+dumpfile(outfile,LINES)
+
+
+print("-------------------------------------------------")
+print("")
+
 
