@@ -15,6 +15,8 @@ def argument():
    longstep_thermodynamics.F
    ptracers_reset.F
    GCHEM_FIELDS.H
+   OBCS_OPTIONS.h
+   DIAGNOSTIC_SIZE.h
 
    by reading from MITgcm code
 '''
@@ -318,7 +320,9 @@ NEW_LINES=[
 "#undef GCHEM_SEPARATE_FORCING",
 "c undefining gchem_separate_forcing actives BFMcoupler_calc_tendency and add_tendency",
 "c  #define GCHEM_SEPARATE_FORCING"]    
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
+LINES=insert_lines(LINES, NEW_LINES, position_line)
+LINES = replace_lines(LINES, "#undef GCHEM_ADD2TR_TENDENCY", ["#define GCHEM_ADD2TR_TENDENCY"])
+OUTLINES = insert_lines(LINES,"",0,finale=True)
 with open(outfile,'w') as fid:
     fid.writelines(OUTLINES)
     
@@ -399,3 +403,40 @@ NEW_LINES=["#ifdef GCHEM_SEPARATE_FORCING",
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line,final=True)
 with open(outfile,'w') as fid:
     fid.writelines(OUTLINES)
+
+
+MITCODE=INPUTDIR + "pkg/obcs/"
+filename="OBCS_OPTIONS.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = get_position_and_strings_on_file(infile, "#define ALLOW_ORLANSKI")
+LINES, position_line = get_position_and_strings_on_file(infile, "#undef ALLOW_OBCS_SPONGE")
+LINES, position_line = get_position_and_strings_on_file(infile, "#undef ALLOW_OBCS_TIDES")
+
+LINES = replace_lines(LINES, "#define ALLOW_ORLANSKI", ["#undef ALLOW_ORLANSKI"])
+LINES = replace_lines(LINES, "#undef ALLOW_OBCS_SPONGE", ["#define ALLOW_OBCS_SPONGE"])
+OUTLINES = replace_lines(LINES,"#undef ALLOW_OBCS_TIDES", ["#define ALLOW_OBCS_TIDES"])
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
+
+
+
+MITCODE=INPUTDIR + "pkg/diagnostics/"
+filename="DIAGNOSTIC_SIZE.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = get_position_and_strings_on_file(infile, "PARAMETER( ndiagMax = 500 )")
+longstr_src  = "PARAMETER( numlists = 10, numperlist = 50, numLevels=2*Nr )"
+longstr_dest = "PARAMETER( numlists = 150, numperlist = 150, numLevels=2*Nr )"
+LINES, position_line = get_position_and_strings_on_file(infile, longstr_src)
+LINES, position_line = get_position_and_strings_on_file(infile, "PARAMETER( numDiags = 1*Nr )")
+LINES, position_line = get_position_and_strings_on_file(infile, "PARAMETER( diagSt_size = 10*Nr )")
+
+LINES = replace_lines(LINES, "PARAMETER( ndiagMax = 500 )", ["PARAMETER( ndiagMax = 1500 )"])
+LINES = replace_lines(LINES, longstr_src, longstr_dest)
+LINES = replace_lines(LINES,"PARAMETER( numDiags = 1*Nr )", ["PARAMETER( numDiags = 150*Nr )"])
+OUTLINES = replace_lines(LINES,"PARAMETER( diagSt_size = 10*Nr )", ["PARAMETER( diagSt_size = 150*Nr )"])
+with open(outfile,'w') as fid:
+    fid.writelines(OUTLINES)
+
+
