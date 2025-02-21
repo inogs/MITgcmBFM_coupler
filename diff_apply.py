@@ -31,6 +31,10 @@ def argument():
                                 type = str,
                                 required = True,
                                 help = '''path of the output dir''')
+    parser.add_argument(   '--ntracers','-n',
+                                type = str,
+                                required = True,
+                                help = '''number of specific site tracers''')
 
     return parser.parse_args()
 
@@ -433,14 +437,23 @@ filename="cg2d.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 LINES, position_line = strings_and_position(infile,"WRITE(standardmessageunit")
-LINES=replace_lines(LINES,"WRITE(standardmessageunit", ["C"])
+LINES=replace_lines(LINES,"WRITE(standardmessageunit",["C"])
 LINES=replace_lines(LINES," cg2d: Sum(rhs),rhsMax = ",["C"])
 dumpfile(outfile,LINES)
 filename="cg3d.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 LINES, position_line = strings_and_position(infile,"WRITE(standardmessageunit")
-LINES = replace_lines(LINES,"WRITE(standardmessageunit",[ "C"])
+LINES = replace_lines(LINES,"WRITE(standardmessageunit",["C"])
 LINES = replace_lines(LINES," cg3d: Sum(rhs),rhsMax = ",["C"])
 dumpfile(outfile,LINES)
 
+MITCODE = INPUTDIR + "pkg/ptracers/"
+filename="PTRACERS_SIZE.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile, "PARAMETER(PTRACERS_num = 1 )")
+Specific_site_tracers = int(args.ntracers)
+newstr=f"      PARAMETER(PTRACERS_num = {51 + Specific_site_tracers} )"
+LINES = replace_lines(LINES,"PARAMETER(PTRACERS_num = 1 )", [newstr])
+dumpfile(outfile,LINES)
