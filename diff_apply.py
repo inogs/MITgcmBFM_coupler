@@ -17,6 +17,11 @@ def argument():
    GCHEM_FIELDS.H
    OBCS_OPTIONS.h
    DIAGNOSTIC_SIZE.h
+   cg2d.F
+   cg3d.F
+   PTRACERS_SIZE.h
+   RBCS_SIZE.h
+   
 
    by reading from MITgcm code
 '''
@@ -457,3 +462,12 @@ Specific_site_tracers = int(args.ntracers)
 newstr=f"      PARAMETER(PTRACERS_num = {51 + Specific_site_tracers} )"
 LINES = replace_lines(LINES,"PARAMETER(PTRACERS_num = 1 )", [newstr])
 dumpfile(outfile,LINES)
+
+MITCODE = INPUTDIR + "pkg/rbcs/"
+filename="RBCS_SIZE.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile, "PARAMETER( maskLEN = 3 )")
+LINES = replace_lines(LINES, "PARAMETER( maskLEN = 3 )" ,["PARAMETER( maskLEN = 53 )"] )
+dumpfile(outfile,LINES)
+
