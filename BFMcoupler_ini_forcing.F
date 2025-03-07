@@ -70,6 +70,11 @@ c !LOCAL VARIABLES: ===================================================
       CALL LEF_ZERO( O3c_botF1,myThid )
       CALL LEF_ZERO( O3h_botF0,myThid )  ! O3h bottom forcing 
       CALL LEF_ZERO( O3h_botF1,myThid )
+C     Adding tracers
+      CALL LEF_ZERO( CG01_botF0,myThid )
+      CALL LEF_ZERO( CG01_botF1,myThid )
+      CALL LEF_ZERO( CG02_botF0,myThid )
+      CALL LEF_ZERO( CG02_botF1,myThid )
 #ifdef READ_PAR
 #ifdef USE_QSW
         WRITE(msgBuf,'(2A)')
@@ -100,6 +105,8 @@ c set reasonable values where/when needed
              O2o_botF(i,j,bi,bj) = 0. _d 0*maskC(i,j,1,bi,bj)
              O3c_botF(i,j,bi,bj) = 0. _d 0*maskC(i,j,1,bi,bj)
              O3h_botF(i,j,bi,bj) = 0. _d 0*maskC(i,j,1,bi,bj)
+             CG01_botF(i,j,bi,bj) = 0. _d 0*maskC(i,j,1,bi,bj)
+             CG02_botF(i,j,bi,bj) = 0. _d 0*maskC(i,j,1,bi,bj)
              DO k = 1,Nr
                 PH(i,j,k,bi,bj)=8.0
              ENDDO
