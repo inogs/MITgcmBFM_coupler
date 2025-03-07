@@ -36,8 +36,8 @@ C  BFMcoupler_O3hBotForcFile    :: file name of O3h contribution
      &    BFMcoupler_O3hSurfForcFile, BFMcoupler_N1pBotForcFile,
      &    BFMcoupler_N3nBotForcFile, BFMcoupler_N4nBotForcFile,
      &    BFMcoupler_O2oBotForcFile, BFMcoupler_O3cBotForcFile,
-	 &    BFMcoupler_CG01BotForcFile,
-	 &    BFMcoupler_CG02BotForcFile,
+     &    BFMcoupler_CG01BotForcFile,
+     &    BFMcoupler_CG02BotForcFile,
      &    BFMcoupler_O3hBotForcFile
      
 
@@ -91,8 +91,8 @@ C ==================================================
        COMMON /NUT_DEPOSITION/
      &          N1p_surfF,N3n_surfF,N5s_surfF,O3c_surfF,
      &          O3h_surfF,N1p_botF,N3n_botF,N4n_botF,
-	 &          CG01_botF,
-	 &          CG02_botF,
+     &          CG01_botF,
+     &          CG02_botF,
      &          O2o_botF,O3c_botF,O3h_botF
       _RL  N1p_surfF(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RL  N3n_surfF(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
