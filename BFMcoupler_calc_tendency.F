@@ -93,6 +93,10 @@ C     == local variables ==
        INTEGER mydate0(4)
        _RL     daysecs
        double precision POSITIVE_VALUE
+      REAL, PARAMETER:: kbc=0.8 ! Chan et al., 2013
+      REAL, PARAMETER:: ksc=0.017
+      REAL, PARAMETER:: kic=0.086
+      REAL, PARAMETER:: Cir=0.5 ! higher transparency (0.5 m-1), reduced water column transparency (1.0 m-1)
 
 C ==== LOCAL VARIABLE FOR DIAGNOSTICS ====
 #ifdef ALLOW_DIAGNOSTICS
@@ -315,6 +319,27 @@ c  ===== return of BFM tendency ====
      &                 gchemTendency(i,j,k,bi,bj,jtr)+b(jtr) ! tendency [mmol/m3/s]
              END DO
 
+       if (PTRACERS_num .GT. jptra) then
+             DO jtr=jptra+1, PTRACERS_num
+#ifdef ALLOW_LONGSTEP
+                gchemTendency(i,j,k,bi,bj,jtr) =
+     &               gchemTendency(i,j,k,bi,bj,jtr)+
+     &               -pTracer(i,j,k,bi,bj,jtr)*
+     &               ((kbc+ksc*LS_salt(i,j,k,bi,bj))*
+     &               (1.07**(LS_theta(i,j,k,bi,bj)-20.0))+
+     &               +(kic*(-LS_Qsw(i,j,bi,bj))*exp(Cir*rC(k))))*
+     &               (1.0/86400) ! Chan et al., 2013
+#else
+                gchemTendency(i,j,k,bi,bj,jtr) =
+     &               gchemTendency(i,j,k,bi,bj,jtr)+
+     &               -pTracer(i,j,k,bi,bj,jtr)*
+     &               ((kbc+ksc*salt(i,j,k,bi,bj))*
+     &               (1.07**(theta(i,j,k,bi,bj)-20.0))+
+     &               +(kic*(-Qsw(i,j,bi,bj))*exp(Cir*rC(k))))*
+     &               (1.0/86400) ! Chan et al., 2013
+#endif /* ALLOW_LONGSTEP */
+             END DO
+       endif
 
 #ifdef BFMcoupler_DEBUG
 c ===== CHECK DEBUGING
@@ -744,6 +769,29 @@ c        DO i=1-OLx,sNx+OLx
      &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s  
         ENDDO
         ENDDO
+      ENDIF
+
+C     Adding extra fluxes
+      IF ( BFMcoupler_CG01BotForcFile.NE. ' '  ) THEN
+       DO j=jmin,jmax
+        DO i=imin,imax
+          kB=kBot(i,j)
+          gchemTendency(i,j,kB,bi,bj,52) =
+     &    gchemTendency(i,j,kB,bi,bj,52)+CG01_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s
+        ENDDO
+       ENDDO
+      ENDIF
+
+      IF ( BFMcoupler_CG02BotForcFile.NE. ' '  ) THEN
+       DO j=jmin,jmax
+        DO i=imin,imax
+          kB=kBot(i,j)
+          gchemTendency(i,j,kB,bi,bj,53) =
+     &    gchemTendency(i,j,kB,bi,bj,53)+CG02_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s
+        ENDDO
+       ENDDO
       ENDIF
 
 

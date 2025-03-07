@@ -56,6 +56,8 @@ C     iUnit     :: Work variable for IO unit number
      &          BFMcoupler_O3hSurfForcFile,BFMcoupler_N1pBotForcFile, 
      &          BFMcoupler_N3nBotForcFile,BFMcoupler_N4nBotForcFile,
      &          BFMcoupler_O2oBotForcFile,BFMcoupler_O3cBotForcFile,
+     &          BFMcoupler_CG01BotForcFile,
+     &          BFMcoupler_CG02BotForcFile,
      &          BFMcoupler_O3hBotForcFile
 #ifdef USE_SINK
      &          ,vsed
@@ -83,6 +85,9 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
        BFMcoupler_O2oBotForcFile= ' '
        BFMcoupler_O3cBotForcFile= ' '
        BFMcoupler_O3hBotForcFile= ' '
+C     Adding tracers
+       BFMcoupler_CG01BotForcFile= ' '
+       BFMcoupler_CG02BotForcFile= ' '
        BFMcoupler_forcingPeriod = externForcingPeriod
        BFMcoupler_forcingCycle  = externForcingCycle
 #ifdef USE_SINK

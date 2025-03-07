@@ -17,6 +17,8 @@ C     BFMcoupler_ldRec     :: time-record currently loaded (in temp arrays *[1])
      &    O3h_surfF0,O3h_surfF1,N1p_botF0,N1p_botF1,
      &    N3n_botF0,N3n_botF1,N4n_botF0,N4n_botF1,
      &    O2o_botF0,O2o_botF1,O3c_botF0,O3c_botF1,
+	 &    CG01_botF0,CG01_botF1,
+	 &    CG02_botF0,CG02_botF1,
      &    O3h_botF0,O3h_botF1
 #ifdef READ_xESP
      &    ,xESP0,xESP1
