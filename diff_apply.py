@@ -24,6 +24,7 @@ def argument():
    RBCS_SIZE.h
    GAD_OPTIONS.h
    EXF_OPTIONS.h
+   MNC_SIZE.h
 
    by reading from MITgcm code
 '''
@@ -522,6 +523,18 @@ LINES = replace_lines(LINES, "# undef ALLOW_ZENITHANGLE", ["#define ALLOW_ZENITH
 LINES = replace_lines(LINES, "#undef USE_EXF_INTERPOLATION", ["#define USE_EXF_INTERPOLATION"])
 dumpfile(outfile,LINES)
 
+MITCODE = INPUTDIR + "pkg/mnc/"
+filename="MNC_SIZE.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"parameter ( MNC_MAX_ID   =   3000 )")
+LINES, position_line = strings_and_position(infile,"parameter ( MNC_MAX_FID  =    200 )")
+
+LINES = replace_lines(LINES,"parameter ( MNC_MAX_ID   =   3000 )",
+                   ["      parameter ( MNC_MAX_ID   =   5000 )"])
+LINES = replace_lines(LINES,"parameter ( MNC_MAX_FID  =    200 )",
+                   ["      parameter ( MNC_MAX_FID  =   5000 )"])
+dumpfile(outfile,LINES)
 
 
 print("-------------------------------------------------")
