@@ -424,9 +424,9 @@ dumpfile(outfile, OUTLINES)
 filename="OBCS_PARAMS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = strings_and_position(infile,"PARAMETER ( OBCS_tideCompSize = 8 )")
-LINES = replace_lines(LINES, "PARAMETER ( OBCS_tideCompSize = 8 )",
-                            ["PARAMETER ( OBCS_tideCompSize = 10 )"] )
+LINES, position_line = strings_and_position(infile,"PARAMETER ( OBCS_tideCompSize = 10 )")
+LINES = replace_lines(LINES, "PARAMETER ( OBCS_tideCompSize = 10 )",
+                            ["PARAMETER ( OBCS_tideCompSize = 8 )"] )
 dumpfile(outfile,LINES)
 
 
@@ -511,14 +511,14 @@ MITCODE = INPUTDIR + "pkg/exf/"
 filename="EXF_OPTIONS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-LINES, position_line = strings_and_position(infile,"#undef ALLOW_RUNOFTEMP")
-LINES, position_line = strings_and_position(infile,"#undef EXF_CALC_ATMRHO")
-LINES, position_line = strings_and_position(infile,"#undef ALLOW_ZENITHANGLE")
+LINES, position_line = strings_and_position(infile,"#undef  ALLOW_RUNOFTEMP")
+LINES, position_line = strings_and_position(infile,"# undef EXF_CALC_ATMRHO")
+LINES, position_line = strings_and_position(infile,"# undef ALLOW_ZENITHANGLE")
 LINES, position_line = strings_and_position(infile,"#undef USE_EXF_INTERPOLATION")
 
 LINES = replace_lines(LINES, "#undef  ALLOW_RUNOFTEMP", ["#define ALLOW_RUNOFTEMP"])
-LINES = replace_lines(LINES, "#undef EXF_CALC_ATMRHO", ["#define EXF_CALC_ATMRHO"])
-LINES = replace_lines(LINES, "#undef ALLOW_ZENITHANGLE", ["#define ALLOW_ZENITHANGLE"])
+LINES = replace_lines(LINES, "# undef EXF_CALC_ATMRHO", ["#define EXF_CALC_ATMRHO"])
+LINES = replace_lines(LINES, "# undef ALLOW_ZENITHANGLE", ["#define ALLOW_ZENITHANGLE"])
 LINES = replace_lines(LINES, "#undef USE_EXF_INTERPOLATION", ["#define USE_EXF_INTERPOLATION"])
 dumpfile(outfile,LINES)
 
