@@ -16,11 +16,14 @@ def argument():
    ptracers_reset.F
    GCHEM_FIELDS.H
    OBCS_OPTIONS.h
+   OBCS_PARAMS.h
    DIAGNOSTIC_SIZE.h
    cg2d.F
    cg3d.F
    PTRACERS_SIZE.h
    RBCS_SIZE.h
+   GAD_OPTIONS.h
+   EXF_OPTIONS.h
 
    by reading from MITgcm code
 '''
@@ -418,6 +421,13 @@ LINES = replace_lines(LINES, "#undef ALLOW_OBCS_SPONGE", ["#define ALLOW_OBCS_SP
 OUTLINES = replace_lines(LINES,"#undef ALLOW_OBCS_TIDES", ["#define ALLOW_OBCS_TIDES"])
 dumpfile(outfile, OUTLINES)
 
+filename="OBCS_PARAMS.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"PARAMETER ( OBCS_tideCompSize = 8 )")
+LINES = replace_lines(LINES, "PARAMETER ( OBCS_tideCompSize = 8 )",
+                            ["PARAMETER ( OBCS_tideCompSize = 10 )"] )
+dumpfile(outfile,LINES)
 
 
 MITCODE=INPUTDIR + "pkg/diagnostics/"
@@ -476,7 +486,6 @@ MITCODE = INPUTDIR + "model/inc/"
 filename="CPP_OPTIONS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-infile=MITCODE + filename
 LINES, position_line = strings_and_position(infile,"#undef SHORTWAVE_HEATING")
 
 LINES = replace_lines(LINES,"#undef SHORTWAVE_HEATING", ["#define SHORTWAVE_HEATING"])
@@ -488,6 +497,31 @@ LINES = replace_lines(LINES,"#undef ALLOW_ADDFLUID", ["#define ALLOW_ADDFLUID"])
 LINES = replace_lines(LINES,"#undef EXCLUDE_FFIELDS_LOAD", ["#define EXCLUDE_FFIELDS_LOAD"])
 LINES = replace_lines(LINES,"#define ALLOW_SRCG", ["#undef ALLOW_SRCG"])
 dumpfile(outfile,LINES)
+
+
+MITCODE = INPUTDIR + "pkg/generic_advdiff/"
+filename="GAD_OPTIONS.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"#undef GAD_ALLOW_TS_SOM_ADV")
+LINES = replace_lines(LINES, "#undef GAD_ALLOW_TS_SOM_ADV", ["#define GAD_ALLOW_TS_SOM_ADV"])
+dumpfile(outfile,LINES)
+
+MITCODE = INPUTDIR + "pkg/exf/"
+filename="EXF_OPTIONS.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"#undef ALLOW_RUNOFTEMP")
+LINES, position_line = strings_and_position(infile,"#undef EXF_CALC_ATMRHO")
+LINES, position_line = strings_and_position(infile,"#undef ALLOW_ZENITHANGLE")
+LINES, position_line = strings_and_position(infile,"#undef USE_EXF_INTERPOLATION")
+
+LINES = replace_lines(LINES, "#undef  ALLOW_RUNOFTEMP", ["#define ALLOW_RUNOFTEMP"])
+LINES = replace_lines(LINES, "#undef EXF_CALC_ATMRHO", ["#define EXF_CALC_ATMRHO"])
+LINES = replace_lines(LINES, "#undef ALLOW_ZENITHANGLE", ["#define ALLOW_ZENITHANGLE"])
+LINES = replace_lines(LINES, "#undef USE_EXF_INTERPOLATION", ["#define USE_EXF_INTERPOLATION"])
+dumpfile(outfile,LINES)
+
 
 
 print("-------------------------------------------------")
