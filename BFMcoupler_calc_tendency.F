@@ -772,23 +772,23 @@ c        DO i=1-OLx,sNx+OLx
       ENDIF
 
 C     Adding extra fluxes
-      IF ( BFMcoupler_CG01BotForcFile.NE. ' '  ) THEN
+      IF ( BFMcoupler_CONC01BotForcFile.NE. ' '  ) THEN
        DO j=jmin,jmax
         DO i=imin,imax
           kB=kBot(i,j)
           gchemTendency(i,j,kB,bi,bj,52) =
-     &    gchemTendency(i,j,kB,bi,bj,52)+CG01_botF(i,j,bi,bj)
+     &    gchemTendency(i,j,kB,bi,bj,52)+CONC01_botF(i,j,bi,bj)
      &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s
         ENDDO
        ENDDO
       ENDIF
 
-      IF ( BFMcoupler_CG02BotForcFile.NE. ' '  ) THEN
+      IF ( BFMcoupler_CONC02BotForcFile.NE. ' '  ) THEN
        DO j=jmin,jmax
         DO i=imin,imax
           kB=kBot(i,j)
           gchemTendency(i,j,kB,bi,bj,53) =
-     &    gchemTendency(i,j,kB,bi,bj,53)+CG02_botF(i,j,bi,bj)
+     &    gchemTendency(i,j,kB,bi,bj,53)+CONC02_botF(i,j,bi,bj)
      &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s
         ENDDO
        ENDDO
