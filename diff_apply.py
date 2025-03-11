@@ -426,7 +426,7 @@ infile=MITCODE + filename
 outfile=MYCODE + filename
 LINES, position_line = strings_and_position(infile,"PARAMETER ( OBCS_tideCompSize = 10 )")
 LINES = replace_lines(LINES, "PARAMETER ( OBCS_tideCompSize = 10 )",
-                            ["PARAMETER ( OBCS_tideCompSize = 8 )"] )
+                            ["       PARAMETER ( OBCS_tideCompSize = 8 )"] )
 dumpfile(outfile,LINES)
 
 
