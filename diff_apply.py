@@ -14,7 +14,6 @@ def argument():
    GCHEM_OPTIONS.h
    longstep_thermodynamics.F
    ptracers_reset.F
-   GCHEM_FIELDS.H
    OBCS_OPTIONS.h
    DIAGNOSTIC_SIZE.h
    cg2d.F
@@ -319,14 +318,15 @@ filename="GCHEM_OPTIONS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
 
+
+LINES, position_line = strings_and_position(infile, "#define GCHEM_SEPARATE_FORCING")
 LINES, position_line = strings_and_position(infile, "#endif /* ALLOW_GCHEM */")
+LINES = replace_lines(LINES, "#define GCHEM_SEPARATE_FORCING", ["#undef GCHEM_SEPARATE_FORCING"])
 NEW_LINES=[
-"#undef GCHEM_SEPARATE_FORCING",
-"c undefining gchem_separate_forcing actives BFMcoupler_calc_tendency and add_tendency",
-"c  #define GCHEM_SEPARATE_FORCING"]    
-LINES=insert_lines(LINES, NEW_LINES, position_line)
-LINES = replace_lines(LINES, "#undef GCHEM_ADD2TR_TENDENCY", ["#define GCHEM_ADD2TR_TENDENCY"])
-OUTLINES = insert_lines(LINES,"",0)
+"#ifdef ALLOW_BFMCOUPLER",
+"# define GCHEM_ADD2TR_TENDENCY",
+"#endif"]
+OUTLINES=insert_lines(LINES,NEW_LINES,position_line)
 dumpfile(outfile, OUTLINES)
     
 
@@ -389,20 +389,7 @@ OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 dumpfile(outfile, OUTLINES)
 
 
-MITCODE=INPUTDIR + "pkg/gchem/"
-filename="GCHEM_FIELDS.h"
-infile=MITCODE + filename
-outfile=MYCODE + filename
 
-LINES, position_line = strings_and_position(infile, "#endif /* GCHEM_ADD2TR_TENDENCY */")
-NEW_LINES=["#ifdef GCHEM_SEPARATE_FORCING",
-"      _RL gchemTendency(1-OLx:sNx+OLx,1-OLy:sNy+OLy,Nr,nSx,nSy,",
-"     &                  PTRACERS_num)",
-"      COMMON /GCHEM_FIELDS/",
-"     &     gchemTendency",
-"#endif /* when define GCHEM_SEPARATE_FORCING */"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
-dumpfile(outfile, OUTLINES)
 
 
 MITCODE=INPUTDIR + "pkg/obcs/"
