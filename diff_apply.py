@@ -12,6 +12,7 @@ def argument():
    longstep_gchem_calc_tendency.F"
    GCHEM.h
    GCHEM_OPTIONS.h
+   GCHEM_SIZE.h
    longstep_thermodynamics.F
    ptracers_reset.F
    OBCS_OPTIONS.h
@@ -328,7 +329,21 @@ NEW_LINES=[
 "#endif"]
 OUTLINES=insert_lines(LINES,NEW_LINES,position_line)
 dumpfile(outfile, OUTLINES)
-    
+
+filename="GCHEM_SIZE.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+searchstring="      PARAMETER( GCHEM_tendTr_num = CFC_Tr_num + SPOIL_Tr_num )"
+LINES, position_line = strings_and_position(infile, searchstring)
+NEW_LINES=[
+"#ifdef ALLOW_BFMCOUPLER",
+"# include \"BFMcoupler_SIZE.h\"",
+"#endif",
+"      PARAMETER( GCHEM_tendTr_num = BFMcoupler_Tr_num)"]
+OUTLINES = replace_lines(LINES, searchstring, NEW_LINES)
+#OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+dumpfile(outfile, OUTLINES)
+
 
 ##### applying differences in longstep Pkg
 MITCODE=INPUTDIR + "pkg/longstep/"
