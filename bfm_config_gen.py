@@ -77,9 +77,9 @@ class BFM_vars(object):
 
         self._vars = parse_namelist(namelist, var_section, var_identifier, var_units_identifier)
         self._vars_properties = dict() # additional properties for all tracers, initialized to null
-        diag_vars = parse_namelist(namelist, diag_var_section, diag_var_identifier, diag_var_units_identifier)
-        diag_vars_2d = parse_namelist(namelist, diag_var_section_2d, diag_var_identifier_2d, diag_var_units_identifier_2d)
-        self._diag_vars = diag_vars + diag_vars_2d # diag_vars and diag_vars_2d in one single list
+        self.diag_vars = parse_namelist(namelist, diag_var_section, diag_var_identifier, diag_var_units_identifier)
+        self.diag_vars_2d = parse_namelist(namelist, diag_var_section_2d, diag_var_identifier_2d, diag_var_units_identifier_2d)
+        self._diag_vars = self.diag_vars + self.diag_vars_2d # diag_vars and diag_vars_2d in one single list
         self._diag_vars_MIT = list() # MITgcm-BFM-only diagnostic variables, initialized to null
 
 
@@ -268,7 +268,7 @@ C '''
             ofile.write(header)
 
             # loop on diagnostic variables
-            for var in self._diag_vars:
+            for var in self.diag_vars:
                 ofile.write('              dia' + var[0] + '(i,j,1:kBot(i,j))=d(' + str(self._diag_vars.index(var)+1) + ',1:kBot(i,j))\n')
 
             # loop on MITgcm-BFM-only diagnostic variables
