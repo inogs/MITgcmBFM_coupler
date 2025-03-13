@@ -12,7 +12,7 @@ C Contains BFMcoupler tracer array size (number of tracers).
 
 C BFMcoupler_Tr_num   :: defines how many BFMcoupler tracer are allocated.
       INTEGER BFMcoupler_Tr_num
-      PARAMETER( BFMcoupler_Tr_num = 51 )
+      PARAMETER( BFMcoupler_Tr_num = 51 + 2 )
 
 #endif /* BFMcoupler_SIZE_H */
 
