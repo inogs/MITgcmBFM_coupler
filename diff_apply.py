@@ -13,14 +13,19 @@ def argument():
    GCHEM.h
    GCHEM_OPTIONS.h
    GCHEM_SIZE.h
+   gchem_tr_register.F
    longstep_thermodynamics.F
    ptracers_reset.F
    OBCS_OPTIONS.h
+   OBCS_PARAMS.h
    DIAGNOSTIC_SIZE.h
    cg2d.F
    cg3d.F
    PTRACERS_SIZE.h
    RBCS_SIZE.h
+   GAD_OPTIONS.h
+   EXF_OPTIONS.h
+   MNC_SIZE.h
 
    by reading from MITgcm code
 '''
@@ -345,6 +350,21 @@ OUTLINES = replace_lines(LINES, searchstring, NEW_LINES)
 dumpfile(outfile, OUTLINES)
 
 
+filename="gchem_tr_register.F"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile, "Numb. Trac & SepForc Trac:")
+NEW_LINES=[
+"#ifdef ALLOW_BFMCOUPLER",
+"      IF ( useBFMcoupler ) THEN",
+"        CALL BFMcoupler_TR_REGISTER(",
+"     U                gchem_Tracer_num, gchem_sepFTr_num,",
+"     I                myThid )",
+"      ENDIF",
+"#endif"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line-3)
+dumpfile(outfile, OUTLINES)
+
 ##### applying differences in longstep Pkg
 MITCODE=INPUTDIR + "pkg/longstep/"
 filename="longstep_thermodynamics.F"
@@ -357,7 +377,7 @@ NEW_LINES=[
 "c CGP 2015/04/03 adding call to gchem_calc_tendency",
 "      CALL LONGSTEP_GCHEM_CALC_TENDENCY( myTime, myIter, myThid )",
 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 dumpfile(outfile, OUTLINES)
     
 
@@ -420,6 +440,13 @@ LINES = replace_lines(LINES, "#undef ALLOW_OBCS_SPONGE", ["#define ALLOW_OBCS_SP
 OUTLINES = replace_lines(LINES,"#undef ALLOW_OBCS_TIDES", ["#define ALLOW_OBCS_TIDES"])
 dumpfile(outfile, OUTLINES)
 
+filename="OBCS_PARAMS.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"PARAMETER ( OBCS_tideCompSize = 10 )")
+LINES = replace_lines(LINES, "PARAMETER ( OBCS_tideCompSize = 10 )",
+                            ["       PARAMETER ( OBCS_tideCompSize = 8 )"] )
+dumpfile(outfile,LINES)
 
 
 MITCODE=INPUTDIR + "pkg/diagnostics/"
@@ -478,7 +505,6 @@ MITCODE = INPUTDIR + "model/inc/"
 filename="CPP_OPTIONS.h"
 infile=MITCODE + filename
 outfile=MYCODE + filename
-infile=MITCODE + filename
 LINES, position_line = strings_and_position(infile,"#undef SHORTWAVE_HEATING")
 
 LINES = replace_lines(LINES,"#undef SHORTWAVE_HEATING", ["#define SHORTWAVE_HEATING"])
@@ -489,6 +515,43 @@ LINES = replace_lines(LINES,"#undef ALLOW_FRICTION_HEATING", ["#define ALLOW_FRI
 LINES = replace_lines(LINES,"#undef ALLOW_ADDFLUID", ["#define ALLOW_ADDFLUID"])
 LINES = replace_lines(LINES,"#undef EXCLUDE_FFIELDS_LOAD", ["#define EXCLUDE_FFIELDS_LOAD"])
 LINES = replace_lines(LINES,"#define ALLOW_SRCG", ["#undef ALLOW_SRCG"])
+dumpfile(outfile,LINES)
+
+
+MITCODE = INPUTDIR + "pkg/generic_advdiff/"
+filename="GAD_OPTIONS.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"#undef GAD_ALLOW_TS_SOM_ADV")
+LINES = replace_lines(LINES, "#undef GAD_ALLOW_TS_SOM_ADV", ["#define GAD_ALLOW_TS_SOM_ADV"])
+dumpfile(outfile,LINES)
+
+MITCODE = INPUTDIR + "pkg/exf/"
+filename="EXF_OPTIONS.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"#undef  ALLOW_RUNOFTEMP")
+LINES, position_line = strings_and_position(infile,"# undef EXF_CALC_ATMRHO")
+LINES, position_line = strings_and_position(infile,"# undef ALLOW_ZENITHANGLE")
+LINES, position_line = strings_and_position(infile,"#undef USE_EXF_INTERPOLATION")
+
+LINES = replace_lines(LINES, "#undef  ALLOW_RUNOFTEMP", ["#define ALLOW_RUNOFTEMP"])
+LINES = replace_lines(LINES, "# undef EXF_CALC_ATMRHO", ["#define EXF_CALC_ATMRHO"])
+LINES = replace_lines(LINES, "# undef ALLOW_ZENITHANGLE", ["#define ALLOW_ZENITHANGLE"])
+LINES = replace_lines(LINES, "#undef USE_EXF_INTERPOLATION", ["#define USE_EXF_INTERPOLATION"])
+dumpfile(outfile,LINES)
+
+MITCODE = INPUTDIR + "pkg/mnc/"
+filename="MNC_SIZE.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"parameter ( MNC_MAX_ID   =   3000 )")
+LINES, position_line = strings_and_position(infile,"parameter ( MNC_MAX_FID  =    200 )")
+
+LINES = replace_lines(LINES,"parameter ( MNC_MAX_ID   =   3000 )",
+                   ["      parameter ( MNC_MAX_ID   =   5000 )"])
+LINES = replace_lines(LINES,"parameter ( MNC_MAX_FID  =    200 )",
+                   ["      parameter ( MNC_MAX_FID  =   5000 )"])
 dumpfile(outfile,LINES)
 
 

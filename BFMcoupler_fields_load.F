@@ -172,6 +172,19 @@ C     data for the period ahead and the period behind myTime.
          CALL READ_REC_XY_RS(BFMcoupler_O3hBotForcFile,O3h_botF1,
      &       intime1,myIter,myThid )
         ENDIF
+        IF ( BFMcoupler_CONC01BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CONC01BotForcFile,CONC01_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CONC01BotForcFile,CONC01_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+        IF ( BFMcoupler_CONC02BotForcFile .NE. ' '  ) THEN
+         CALL READ_REC_XY_RS(BFMcoupler_CONC02BotForcFile,CONC02_botF0,
+     &       intime0,myIter,myThid )
+         CALL READ_REC_XY_RS(BFMcoupler_CONC02BotForcFile,CONC02_botF1,
+     &       intime1,myIter,myThid )
+        ENDIF
+
 #ifdef READ_xESP
         IF ( BFMcoupler_xESPFile .NE. ' '  ) THEN
          CALL READ_REC_XY_RS(BFMcoupler_xESPFile,xESP0,intime0,
@@ -216,6 +229,11 @@ C--   fill-in overlap after loading temp arrays:
         _EXCH_XY_RS(O3c_botF1, myThid )
         _EXCH_XY_RS(O3h_botF0, myThid )
         _EXCH_XY_RS(O3h_botF1, myThid )
+        _EXCH_XY_RS(CONC01_botF0, myThid )
+        _EXCH_XY_RS(CONC01_botF1, myThid )
+        _EXCH_XY_RS(CONC02_botF0, myThid )
+        _EXCH_XY_RS(CONC02_botF1, myThid )
+
 #ifdef READ_xESP
         _EXCH_XY_RS(xESP0, myThid )
         _EXCH_XY_RS(xESP1, myThid )
@@ -362,9 +380,27 @@ C------------------------------------------
             ENDDO
            ENDDO
          ENDIF
+
+C     Adding tracers
+         IF ( BFMcoupler_CONC01BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CONC01_botF(i,j,bi,bj) = bWght*CONC01_botF0(i,j,bi,bj)
+     &                          + aWght*CONC01_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+         IF ( BFMcoupler_CONC02BotForcFile.NE. ' '  ) THEN
+           DO j=1-OLy,sNy+OLy
+            DO i=1-OLx,sNx+OLx
+             CONC02_botF(i,j,bi,bj) = bWght*CONC02_botF0(i,j,bi,bj)
+     &                          + aWght*CONC02_botF1(i,j,bi,bj)
+            ENDDO
+           ENDDO
+         ENDIF
+
         ENDDO
        ENDDO
-
 C endif for BFMcoupler_forcingCycle
       ENDIF
 

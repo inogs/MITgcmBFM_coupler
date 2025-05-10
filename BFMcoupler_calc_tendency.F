@@ -72,7 +72,7 @@ C     === Local variables ====
        _RL a(jptra),er(10),b(jptra),c(4),d(jptra_dia),d2(1)
 C      _RS AtmosWIND0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy) 
        logical bot,sur
-#else
+#else /* BFMv5 */
        _RL a(Nr,jptra)
        _RL er(Nr,11)
        _RL b(jptra,Nr)
@@ -93,6 +93,10 @@ C     == local variables ==
        INTEGER mydate0(4)
        _RL     daysecs
        double precision POSITIVE_VALUE
+      REAL, PARAMETER:: kbc=0.8 ! Chan et al., 2013
+      REAL, PARAMETER:: ksc=0.017
+      REAL, PARAMETER:: kic=0.086
+      REAL, PARAMETER:: Cir=0.5 ! higher transparency (0.5 m-1), reduced water column transparency (1.0 m-1)
 
 C ==== LOCAL VARIABLE FOR DIAGNOSTICS ====
 #ifdef ALLOW_DIAGNOSTICS
@@ -315,6 +319,27 @@ c  ===== return of BFM tendency ====
      &                 gchemTendency(i,j,k,bi,bj,jtr)+b(jtr) ! tendency [mmol/m3/s]
              END DO
 
+       if (PTRACERS_num .GT. jptra) then
+             DO jtr=jptra+1, PTRACERS_num
+#ifdef ALLOW_LONGSTEP
+                gchemTendency(i,j,k,bi,bj,jtr) =
+     &               gchemTendency(i,j,k,bi,bj,jtr)+
+     &               -pTracer(i,j,k,bi,bj,jtr)*
+     &               ((kbc+ksc*LS_salt(i,j,k,bi,bj))*
+     &               (1.07**(LS_theta(i,j,k,bi,bj)-20.0))+
+     &               +(kic*(-LS_Qsw(i,j,bi,bj))*exp(Cir*rC(k))))*
+     &               (1.0/86400) ! Chan et al., 2013
+#else
+                gchemTendency(i,j,k,bi,bj,jtr) =
+     &               gchemTendency(i,j,k,bi,bj,jtr)+
+     &               -pTracer(i,j,k,bi,bj,jtr)*
+     &               ((kbc+ksc*salt(i,j,k,bi,bj))*
+     &               (1.07**(theta(i,j,k,bi,bj)-20.0))+
+     &               +(kic*(-Qsw(i,j,bi,bj))*exp(Cir*rC(k))))*
+     &               (1.0/86400) ! Chan et al., 2013
+#endif /* ALLOW_LONGSTEP */
+             END DO
+       endif
 
 #ifdef BFMcoupler_DEBUG
 c ===== CHECK DEBUGING
@@ -434,7 +459,7 @@ c  ====== save BFM diagnostics in MITgcm diagnostic pkg
          ENDDO   ! enddo j cycle
          ENDDO ! enddo k cycle
 
-#else
+#else  FROM HERE CODE is for BFMv5
 
 c      DO j=1-OLy,sNy+OLy
 c      DO i=1-OLx,sNx+OLx
@@ -497,7 +522,7 @@ c      DO i=1-OLx,sNx+OLx
              er(1:kBot(i,j),10) = PH(i,j,1:kBot(i,j),bi,bj) ! from BFMcoupler_VAR.h
              er(1:kBot(i,j),11) = 0.0
 
-c  ===== CALL TO BFM ====
+c  ===== CALL TO BFMv5 ====
              CALL BFM1D_Input_EcologyDynamics(kBot(i,j),a,jptra,er)
              CALL BFM1D_reset()
              CALL EcologyDynamics()
@@ -508,6 +533,31 @@ c  ===== return of BFM tendency ====
      &               gchemTendency(i,j,1:kBot(i,j),bi,bj,jtr) +
      &               b(jtr,1:kBot(i,j)) ! tendency [mmol/m3/s]
              END DO
+
+c ======= decay tendency for CONC01, CONC02, ... Chan et al., 2013
+       if (PTRACERS_num .GT. jptra) then
+             DO jtr=jptra+1, PTRACERS_num
+             do k=1,Nr
+#ifdef ALLOW_LONGSTEP
+                gchemTendency(i,j,k,bi,bj,jtr) =
+     &               gchemTendency(i,j,k,bi,bj,jtr)+
+     &               -pTracer(i,j,k,bi,bj,jtr)*
+     &               ((kbc+ksc*LS_salt(i,j,k,bi,bj))*
+     &               (1.07**(LS_theta(i,j,k,bi,bj)-20.0))+
+     &               +(kic*(-LS_Qsw(i,j,bi,bj))*exp(Cir*rC(k))))*
+     &               (1.0/86400)
+#else
+                gchemTendency(i,j,k,bi,bj,jtr) =
+     &               gchemTendency(i,j,k,bi,bj,jtr)+
+     &               -pTracer(i,j,k,bi,bj,jtr)*
+     &               ((kbc+ksc*salt(i,j,k,bi,bj))*
+     &               (1.07**(theta(i,j,k,bi,bj)-20.0))+
+     &               +(kic*(-Qsw(i,j,bi,bj))*exp(Cir*rC(k))))*
+     &               (1.0/86400)
+#endif /* ALLOW_LONGSTEP */
+             end do
+             END DO
+       endif
 
 c  ===== sinking velocity for 4 phyto
              DO jtr=1,4
@@ -744,6 +794,29 @@ c        DO i=1-OLx,sNx+OLx
      &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s  
         ENDDO
         ENDDO
+      ENDIF
+
+C     Adding extra fluxes
+      IF ( BFMcoupler_CONC01BotForcFile.NE. ' '  ) THEN
+       DO j=jmin,jmax
+        DO i=imin,imax
+          kB=kBot(i,j)
+          gchemTendency(i,j,kB,bi,bj,52) =
+     &    gchemTendency(i,j,kB,bi,bj,52)+CONC01_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s
+        ENDDO
+       ENDDO
+      ENDIF
+
+      IF ( BFMcoupler_CONC02BotForcFile.NE. ' '  ) THEN
+       DO j=jmin,jmax
+        DO i=imin,imax
+          kB=kBot(i,j)
+          gchemTendency(i,j,kB,bi,bj,53) =
+     &    gchemTendency(i,j,kB,bi,bj,53)+CONC02_botF(i,j,bi,bj)
+     &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s
+        ENDDO
+       ENDDO
       ENDIF
 
 
