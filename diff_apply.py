@@ -13,6 +13,7 @@ def argument():
    GCHEM.h
    GCHEM_OPTIONS.h
    GCHEM_SIZE.h
+   gchem_tr_register.F
    longstep_thermodynamics.F
    ptracers_reset.F
    OBCS_OPTIONS.h
@@ -348,6 +349,21 @@ OUTLINES = replace_lines(LINES, searchstring, NEW_LINES)
 #OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
 dumpfile(outfile, OUTLINES)
 
+
+filename="gchem_tr_register.F"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile, "Numb. Trac & SepForc Trac:")
+NEW_LINES=[
+"#ifdef ALLOW_BFMCOUPLER",
+"      IF ( useBFMcoupler ) THEN",
+"        CALL BFMcoupler_TR_REGISTER(",
+"     U                gchem_Tracer_num, gchem_sepFTr_num,",
+"     I                myThid )",
+"      ENDIF",
+"#endif"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line-3)
+dumpfile(outfile, OUTLINES)
 
 ##### applying differences in longstep Pkg
 MITCODE=INPUTDIR + "pkg/longstep/"
