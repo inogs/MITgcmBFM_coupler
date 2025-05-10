@@ -380,8 +380,6 @@ C------------------------------------------
             ENDDO
            ENDDO
          ENDIF
-        ENDDO
-       ENDDO
 
 C     Adding tracers
          IF ( BFMcoupler_CONC01BotForcFile.NE. ' '  ) THEN
@@ -401,6 +399,8 @@ C     Adding tracers
            ENDDO
          ENDIF
 
+        ENDDO
+       ENDDO
 C endif for BFMcoupler_forcingCycle
       ENDIF
 
