@@ -72,7 +72,7 @@ C     === Local variables ====
        _RL a(jptra),er(10),b(jptra),c(4),d(jptra_dia),d2(1)
 C      _RS AtmosWIND0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy) 
        logical bot,sur
-#else
+#else /* BFMv5 */
        _RL a(Nr,jptra)
        _RL er(Nr,11)
        _RL b(jptra,Nr)
@@ -459,7 +459,7 @@ c  ====== save BFM diagnostics in MITgcm diagnostic pkg
          ENDDO   ! enddo j cycle
          ENDDO ! enddo k cycle
 
-#else
+#else  FROM HERE CODE is for BFMv5
 
 c      DO j=1-OLy,sNy+OLy
 c      DO i=1-OLx,sNx+OLx
@@ -522,7 +522,7 @@ c      DO i=1-OLx,sNx+OLx
              er(1:kBot(i,j),10) = PH(i,j,1:kBot(i,j),bi,bj) ! from BFMcoupler_VAR.h
              er(1:kBot(i,j),11) = 0.0
 
-c  ===== CALL TO BFM ====
+c  ===== CALL TO BFMv5 ====
              CALL BFM1D_Input_EcologyDynamics(kBot(i,j),a,jptra,er)
              CALL BFM1D_reset()
              CALL EcologyDynamics()
@@ -533,6 +533,31 @@ c  ===== return of BFM tendency ====
      &               gchemTendency(i,j,1:kBot(i,j),bi,bj,jtr) +
      &               b(jtr,1:kBot(i,j)) ! tendency [mmol/m3/s]
              END DO
+
+c ======= decay tendency for CONC01, CONC02, ... Chan et al., 2013
+       if (PTRACERS_num .GT. jptra) then
+             DO jtr=jptra+1, PTRACERS_num
+             do k=1,Nr
+#ifdef ALLOW_LONGSTEP
+                gchemTendency(i,j,k,bi,bj,jtr) =
+     &               gchemTendency(i,j,k,bi,bj,jtr)+
+     &               -pTracer(i,j,k,bi,bj,jtr)*
+     &               ((kbc+ksc*LS_salt(i,j,k,bi,bj))*
+     &               (1.07**(LS_theta(i,j,k,bi,bj)-20.0))+
+     &               +(kic*(-LS_Qsw(i,j,bi,bj))*exp(Cir*rC(k))))*
+     &               (1.0/86400)
+#else
+                gchemTendency(i,j,k,bi,bj,jtr) =
+     &               gchemTendency(i,j,k,bi,bj,jtr)+
+     &               -pTracer(i,j,k,bi,bj,jtr)*
+     &               ((kbc+ksc*salt(i,j,k,bi,bj))*
+     &               (1.07**(theta(i,j,k,bi,bj)-20.0))+
+     &               +(kic*(-Qsw(i,j,bi,bj))*exp(Cir*rC(k))))*
+     &               (1.0/86400)
+#endif /* ALLOW_LONGSTEP */
+             end do
+             END DO
+       endif
 
 c  ===== sinking velocity for 4 phyto
              DO jtr=1,4
