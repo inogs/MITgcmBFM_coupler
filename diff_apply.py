@@ -361,7 +361,7 @@ NEW_LINES=[
 "c CGP 2015/04/03 adding call to gchem_calc_tendency",
 "      CALL LONGSTEP_GCHEM_CALC_TENDENCY( myTime, myIter, myThid )",
 "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"]
-OUTLINES=insert_lines(LINES, NEW_LINES, position_line)
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 dumpfile(outfile, OUTLINES)
     
 
