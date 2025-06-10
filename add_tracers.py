@@ -3,39 +3,61 @@ from jinja2 import FileSystemLoader
 from jinja2 import StrictUndefined
 
 from pathlib import Path
+import shutil
+from argparse import ArgumentParser
 
 TEMPLATE_DIR = Path("./tpl")
 
-FILES = [
+TARGET_TPL = [
+    Path("BFMcoupler_LOAD.h.tpl"),
+    Path("BFMcoupler_SIZE.h.tpl"),
+    Path("BFMcoupler_VARS.h.tpl"),
+    Path("BFMcoupler_calc_tendency.F.tpl"),
+    Path("BFMcoupler_fields_load.F.tpl"),
+    Path("BFMcoupler_ini_forcing.F.tpl"),
+    Path("BFMcoupler_readparams.F.tpl"),
+    Path("BFMcoupler_tr_register.F.tpl"),
 ]
 
-if __name__ == "__main__":
+TARGET_STATIC = [
+    Path("BFMcoupler_init_fixed.F"),
+    Path("BFMcoupler_OPTIONS.h"),
+]
+
+def copy_static(dest_dir: Path):
+    for file in TARGET_STATIC:
+        shutil.copy2(file, dest_dir / file)
+
+
+def write_templates(dest_dir: Path, n_tracers: int):
     template_env = Environment(
         loader=FileSystemLoader(TEMPLATE_DIR),
         undefined=StrictUndefined,
     )
 
-    load_tpl = template_env.get_template("BFMcoupler_LOAD.h.tpl")
-    load_target = load_tpl.render(n_tracers=2)
+    for file in TARGET_TPL:
+        tpl = template_env.get_template(file.as_posix())
+        target = dest_dir / file.stem
+        target.write_text(tpl.render(n_tracers=n_tracers))
 
-    size_tpl = template_env.get_template("BFMcoupler_SIZE.h.tpl")
-    size_target = size_tpl.render(n_tracers=2)
-    
-    vars_tpl = template_env.get_template("BFMcoupler_VARS.h.tpl")
-    vars_target = vars_tpl.render(n_tracers=2)
-    
-    calc_tendency_tpl = template_env.get_template("BFMcoupler_calc_tendency.F.tpl")
-    calc_tendency_target = calc_tendency_tpl.render(n_tracers=2)
 
-    fields_load_tpl = template_env.get_template("BFMcoupler_fields_load.F.tpl")
-    fields_local_target = fields_load_tpl.render(n_tracers=2)
+if __name__ == "__main__":
+    parser = ArgumentParser(prog="Tracers patcher")
+    parser.add_argument(
+        "--outdir",
+        "-o",
+        type=Path,
+        required=True,
+        help="Destination directory",
+    )
+    parser.add_argument(
+        "-n",
+        type=int,
+        required=True,
+        help="Number of tracers to add",
+    )
 
-    ini_forcing_tpl = template_env.get_template("BFMcoupler_ini_forcing.F.tpl")
-    ini_forcing_target = ini_forcing_tpl.render(n_tracers=2)
+    args = parser.parse_args()
 
-    readparams_tpl = template_env.get_template("BFMcoupler_readparams.F.tpl")
-    readparams_target = readparams_tpl.render(n_tracers=2)
-
-    tr_register_tpl = template_env.get_template("BFMcoupler_tr_register.F.tpl")
-    tr_register_target = tr_register_tpl.render(n_tracers=2)
-    print(tr_register_target)
+    copy_static(args.outdir)
+    write_templates(args.outdir, args.n)

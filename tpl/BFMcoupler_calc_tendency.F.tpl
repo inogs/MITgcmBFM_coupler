@@ -802,8 +802,8 @@ C     Adding extra fluxes
        DO j=jmin,jmax
         DO i=imin,imax
           kB=kBot(i,j)
-          gchemTendency(i,j,kB,bi,bj,52) =
-     &    gchemTendency(i,j,kB,bi,bj,52)+CONC{{'%02d' % i}}_botF(i,j,bi,bj)
+          gchemTendency(i,j,kB,bi,bj,{{51 + i}}) =
+     &    gchemTendency(i,j,kB,bi,bj,{{51 + i}})+CONC{{'%02d' % i}}_botF(i,j,bi,bj)
      &    *recip_drF(kB)*recip_hFacC(i,j,kB,bi,bj)!tendency is mmol/m3/s
         ENDDO
        ENDDO
