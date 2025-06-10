@@ -86,6 +86,7 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
        BFMcoupler_O2oBotForcFile= ' '
        BFMcoupler_O3cBotForcFile= ' '
        BFMcoupler_O3hBotForcFile= ' '
+C     Adding tracers
        {%- for i in range(1, n_tracers + 1) %}
        BFMcoupler_CONC{{'%02d' % i}}BotForcFile= ' '
        {%- endfor %}
@@ -184,6 +185,7 @@ C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 
       RETURN
       END
+
 
 
 

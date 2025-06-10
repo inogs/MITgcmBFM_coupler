@@ -70,9 +70,10 @@ c !LOCAL VARIABLES: ===================================================
       CALL LEF_ZERO( O3c_botF1,myThid )
       CALL LEF_ZERO( O3h_botF0,myThid )  ! O3h bottom forcing 
       CALL LEF_ZERO( O3h_botF1,myThid )
+C     Adding tracers
       {%- for i in range(1, n_tracers + 1) %}
-      CALL LEF_ZERO( CONC{{'%02d' % i}}_botF0,pyThid )
-      CALL LEF_ZERO( CONC{{'%02d' % i}}_botF1,pyThid )
+      CALL LEF_ZERO( CONC{{'%02d' % i}}_botF0,myThid )
+      CALL LEF_ZERO( CONC{{'%02d' % i}}_botF1,myThid )
       {%- endfor %}
 #ifdef READ_PAR
 #ifdef USE_QSW
@@ -120,3 +121,4 @@ c set reasonable values where/when needed
 #endif /* ALLOW_BFMCOUPLER */
       RETURN
       END
+
