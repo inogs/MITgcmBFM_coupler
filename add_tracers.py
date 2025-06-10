@@ -6,6 +6,9 @@ from pathlib import Path
 
 TEMPLATE_DIR = Path("./tpl")
 
+FILES = [
+]
+
 if __name__ == "__main__":
     template_env = Environment(
         loader=FileSystemLoader(TEMPLATE_DIR),
@@ -32,4 +35,7 @@ if __name__ == "__main__":
 
     readparams_tpl = template_env.get_template("BFMcoupler_readparams.F.tpl")
     readparams_target = readparams_tpl.render(n_tracers=2)
-    print(readparams_target)
+
+    tr_register_tpl = template_env.get_template("BFMcoupler_tr_register.F.tpl")
+    tr_register_target = tr_register_tpl.render(n_tracers=2)
+    print(tr_register_target)

@@ -36,7 +36,7 @@ C     msgBuf     :: message buffer
       INTEGER BFMcoupler_Tr_num
 CEOP
 c     TODO generalized for a generic number of passive conc tracers
-      BFMcoupler_Tr_num = 51 + 2
+      BFMcoupler_Tr_num = 51 + {{n_tracers}}
 
       WRITE(msgBuf,'(2A,2I5)') '  BFMcoupler_TR_REGISTER: ',
      &     ' number of BFMcoupler tracers=', BFMcoupler_Tr_num
