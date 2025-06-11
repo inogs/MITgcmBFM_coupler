@@ -387,7 +387,7 @@ C     Adding tracers
             ENDDO
            ENDDO
          ENDIF
-      {% endfor %}
+      {%- endfor %}
         ENDDO
        ENDDO
 C endif for BFMcoupler_forcingCycle

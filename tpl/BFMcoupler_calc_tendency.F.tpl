@@ -808,7 +808,7 @@ C     Adding extra fluxes
         ENDDO
        ENDDO
       ENDIF
-      {% endfor %}
+      {%- endfor %}
 
 C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|
 C ==== fill the diagnostic variables 
