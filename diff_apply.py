@@ -587,6 +587,11 @@ infile=MITCODE + filename
 outfile=MYCODE + filename
 LINES, position_line = strings_and_position(infile,"& humid_fac, gamma_blk, saltsat, sstExtrapol, psim_fac")
 LINES, position_line = strings_and_position(infile,"&        siobWperiod,   siobWrepCycle")
+LINES, position_line = strings_and_positions(infile, "      diags_opOceWeighted= .TRUE.")
+LINES, position_line = strings_and_positions(infile, "      siobWperiod        = UNSET_RL")
+LINES, position_line = strings_and_positions(infile, "      siobWstartTime     = UNSET_RL")
+LINES, position_line = strings_and_positions(infile, "      siobWrepCycle      = UNSET_RL")
+LINES, position_line = strings_and_positions(infile, "       IF(exf_iprec_obcs .EQ. UNSET_I) exf_iprec_obcs =exf_iprec")
 
 l0= "     & humid_fac, gamma_blk, saltsat, sstExtrapol, psim_fac"
 l1 = ["     & humid_fac, gamma_blk, saltsat, sstExtrapol, psim_fac,",
