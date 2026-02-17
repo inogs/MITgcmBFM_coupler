@@ -180,11 +180,34 @@ dumpfile(outfile, OUTLINES)
 filename="gchem_fields_load.F"
 infile=MITCODE + filename
 outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile, "#include \"GCHEM.h\"")
 LINES, position_line = strings_and_position(infile, "#endif /* ALLOW_GCHEM */")
+LINES, position_line = strings_and_position(infile, "      IMPLICIT NONE")
 
 NEW_LINES=[
+"#include \"SIZE.h\""]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+
+LINES=OUTLINES
+position_line = get_position_on_strings(LINES, "#include \"GCHEM.h\"")
+
+NEW_LINES=[
+"#include \"PARAMS.h\"",
+"#include \"EXF_PARAM.h\""]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+
+LINES=OUTLINES
+position_line = get_position_on_strings(LINES, "#endif /* ALLOW_GCHEM */")
+
+NEW_LINES=[
+"#if ( defined ALLOW_EXF ) && ( defined ALLOW_BFMCOUPLER )",
+"      IF ( useBFMexf .AND. useEXF .AND. useBFMcoupler ) THEN",
+"       CALL BFMcoupler_EXF_LOAD(myTime, myIter, myThid)",
+"      ENDIF",
+"#endif",
+"      ", 
 "#ifdef ALLOW_BFMCOUPLER",
-"      IF ( useBFMcoupler ) THEN",
+"      IF ( .NOT. (useBFMexf .AND. useEXF) .AND. useBFMcoupler ) THEN",
 "       CALl BFMcoupler_FIELDS_LOAD(myIter,myTime,myThid)",
 "      ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]
