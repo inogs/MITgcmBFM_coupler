@@ -26,6 +26,10 @@ def argument():
    GAD_OPTIONS.h
    EXF_OPTIONS.h
    MNC_SIZE.h
+   exf_readparms.F
+   exf_init_fixed.F
+   exf_swapffields.F
+   EXF_PARAM.h
 
    by reading from MITgcm code
 '''
@@ -575,6 +579,93 @@ LINES = replace_lines(LINES,"parameter ( MNC_MAX_ID   =   3000 )",
                    ["      parameter ( MNC_MAX_ID   =   5000 )"])
 LINES = replace_lines(LINES,"parameter ( MNC_MAX_FID  =    200 )",
                    ["      parameter ( MNC_MAX_FID  =   5000 )"])
+dumpfile(outfile,LINES)
+
+MITCODE = INPUTDIR + "pkg/exf/"
+filename="exf_readparms.F"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"& humid_fac, gamma_blk, saltsat, sstExtrapol, psim_fac")
+LINES, position_line = strings_and_position(infile,"&        siobWperiod,   siobWrepCycle")
+
+l0= "     & humid_fac, gamma_blk, saltsat, sstExtrapol, psim_fac"
+l1 = ["     & humid_fac, gamma_blk, saltsat, sstExtrapol, psim_fac,",
+ "     & useBFMexf"]
+LINES = replace_lines(LINES,l0, l1 )
+
+position_line = get_position_on_strings(LINES, "     &        siobWperiod,   siobWrepCycle")
+NEW_LINES=[
+"       ",
+"#ifdef ALLOW_BFMCOUPLER",
+"      NAMELIST /EXF_NML_BFM/",
+"     &    useBFMcouplerYearlyFields,",
+"     &    BFMcouplerSstartdate1,   BFMcouplerSstartdate2,",
+"     &    BFMcouplerSstartTime,",
+"     &    BFMcouplerSperiod,   BFMcouplerSrepCycle,",
+"     &    BFMcouplerBstartdate1,   BFMcouplerBstartdate2,",
+"     &    BFMcouplerBstartTime,",
+"     &    BFMcouplerBperiod,   BFMcouplerBrepCycle,",
+"     &    BFMcouplerKstartdate1,   BFMcouplerKstartdate2,",
+"     &    BFMcouplerKstartTime,",
+"     &    BFMcouplerKperiod,   BFMcouplerKrepCycle",
+"#endif"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+2)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "      diags_opOceWeighted= .TRUE.")
+NEW_LINES=[
+"       ",
+"      useBFMexf          = .FALSE."]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "      siobWperiod        = UNSET_RL")
+NEW_LINES=[
+"       ",
+"      useBFMcouplerYearlyFields = .FALSE.",
+"      BFMcouplerSstartdate1    = 0",
+"      BFMcouplerSstartdate2    = 0",
+"      BFMcouplerSperiod        = 0.0 _d 0",
+"      BFMcouplerBstartdate1    = 0",
+"      BFMcouplerBstartdate2    = 0",
+"      BFMcouplerBperiod        = 0.0 _d 0",
+"      BFMcouplerKstartdate1    = 0",
+"      BFMcouplerKstartdate2    = 0",
+"      BFMcouplerKperiod        = 0.0 _d 0"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "      siobWstartTime     = UNSET_RL")
+NEW_LINES=[
+"      BFMcouplerSstartTime = UNSET_RL",
+"      BFMcouplerBstartTime = UNSET_RL",
+"      BFMcouplerKstartTime = UNSET_RL"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "      siobWrepCycle      = UNSET_RL")
+NEW_LINES=[
+"       ",
+"      BFMcouplerSrepCycle = repeatPeriod",
+"      BFMcouplerBrepCycle = repeatPeriod",
+"      BFMcouplerKrepCycle = repeatPeriod"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "       IF(exf_iprec_obcs .EQ. UNSET_I) exf_iprec_obcs =exf_iprec")
+NEW_LINES=[
+"       ",
+"#ifdef ALLOW_BFMCOUPLER",
+"      IF ( useBFMexf ) THEN",
+"       WRITE(msgBuf,'(A)')",
+"     &      'EXF_READPARMS: reading EXF_NML_BFM'",
+"       CALL PRINT_MESSAGE( msgBuf, standardMessageUnit,",
+"     &                     SQUEEZE_RIGHT, myThid )",
+"       READ(  iUnit, nml = EXF_NML_BFM )",
+"      ENDIF",
+"#endif"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+2)
+LINES=OUTLINES
 dumpfile(outfile,LINES)
 
 
