@@ -209,7 +209,7 @@ NEW_LINES=[
 "       CALL BFMcoupler_EXF_LOAD(myTime, myIter, myThid)",
 "      ENDIF",
 "#endif",
-"      ", 
+"", 
 "#ifdef ALLOW_BFMCOUPLER",
 "      IF ( .NOT. (useBFMexf .AND. useEXF) .AND. useBFMcoupler ) THEN",
 "       CALl BFMcoupler_FIELDS_LOAD(myIter,myTime,myThid)",
@@ -587,11 +587,11 @@ infile=MITCODE + filename
 outfile=MYCODE + filename
 LINES, position_line = strings_and_position(infile,"& humid_fac, gamma_blk, saltsat, sstExtrapol, psim_fac")
 LINES, position_line = strings_and_position(infile,"&        siobWperiod,   siobWrepCycle")
-LINES, position_line = strings_and_positions(infile, "      diags_opOceWeighted= .TRUE.")
-LINES, position_line = strings_and_positions(infile, "      siobWperiod        = UNSET_RL")
-LINES, position_line = strings_and_positions(infile, "      siobWstartTime     = UNSET_RL")
-LINES, position_line = strings_and_positions(infile, "      siobWrepCycle      = UNSET_RL")
-LINES, position_line = strings_and_positions(infile, "       IF(exf_iprec_obcs .EQ. UNSET_I) exf_iprec_obcs =exf_iprec")
+LINES, position_line = strings_and_position(infile, "      diags_opOceWeighted= .TRUE.")
+LINES, position_line = strings_and_position(infile, "      siobWperiod        = UNSET_RL")
+LINES, position_line = strings_and_position(infile, "      siobWstartTime     = UNSET_RL")
+LINES, position_line = strings_and_position(infile, "      siobWrepCycle      = UNSET_RL")
+LINES, position_line = strings_and_position(infile, "       IF(exf_iprec_obcs .EQ. UNSET_I) exf_iprec_obcs =exf_iprec")
 
 l0= "     & humid_fac, gamma_blk, saltsat, sstExtrapol, psim_fac"
 l1 = ["     & humid_fac, gamma_blk, saltsat, sstExtrapol, psim_fac,",
@@ -600,7 +600,7 @@ LINES = replace_lines(LINES,l0, l1 )
 
 position_line = get_position_on_strings(LINES, "     &        siobWperiod,   siobWrepCycle")
 NEW_LINES=[
-"       ",
+"",
 "#ifdef ALLOW_BFMCOUPLER",
 "      NAMELIST /EXF_NML_BFM/",
 "     &    useBFMcouplerYearlyFields,",
@@ -619,14 +619,14 @@ LINES=OUTLINES
 
 position_line = get_position_on_strings(LINES, "      diags_opOceWeighted= .TRUE.")
 NEW_LINES=[
-"       ",
+"",
 "      useBFMexf          = .FALSE."]
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 LINES=OUTLINES
 
 position_line = get_position_on_strings(LINES, "      siobWperiod        = UNSET_RL")
 NEW_LINES=[
-"       ",
+"",
 "      useBFMcouplerYearlyFields = .FALSE.",
 "      BFMcouplerSstartdate1    = 0",
 "      BFMcouplerSstartdate2    = 0",
@@ -650,7 +650,7 @@ LINES=OUTLINES
 
 position_line = get_position_on_strings(LINES, "      siobWrepCycle      = UNSET_RL")
 NEW_LINES=[
-"       ",
+"",
 "      BFMcouplerSrepCycle = repeatPeriod",
 "      BFMcouplerBrepCycle = repeatPeriod",
 "      BFMcouplerKrepCycle = repeatPeriod"]
@@ -659,7 +659,7 @@ LINES=OUTLINES
 
 position_line = get_position_on_strings(LINES, "       IF(exf_iprec_obcs .EQ. UNSET_I) exf_iprec_obcs =exf_iprec")
 NEW_LINES=[
-"       ",
+"",
 "#ifdef ALLOW_BFMCOUPLER",
 "      IF ( useBFMexf ) THEN",
 "       WRITE(msgBuf,'(A)')",
@@ -670,6 +670,112 @@ NEW_LINES=[
 "      ENDIF",
 "#endif"]
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line+2)
+LINES=OUTLINES
+dumpfile(outfile,LINES)
+
+MITCODE = INPUTDIR + "pkg/exf/"
+filename="exf_init_fixed.F"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"#include \"EXF_INTERP_PARAM.h\"")
+LINES, position_line = strings_and_position(infile, "#endif /* ALLOW_OBCS */")
+
+LINES, position_line = strings_and_position(infile,"#include \"EXF_INTERP_PARAM.h\"")
+NEW_LINES=[
+"#include \"GCHEM.h\""]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "#endif /* ALLOW_OBCS */")
+NEW_LINES=[
+"",
+"#ifdef ALLOW_BFMCOUPLER",
+"      IF ( useBFMcoupler .AND. useBFMexf ) THEN",
+"# ifdef ALLOW_DEBUG",
+"       IF (debugMode) CALL DEBUG_CALL('GETFFIELD_START BFM Sur',myThid)",
+"# endif",
+"       CALL EXF_GETFFIELD_START( useBFMcouplerYearlyFields,",
+"     I                    'exf', 'BFM', BFMcouplerSperiod,",
+"     I                    BFMcouplerSstartdate1, BFMcouplerSstartdate2,",
+"     U                    BFMcouplerSstartTime, errCount,",
+"     I                    myThid )",
+"# ifdef ALLOW_DEBUG",
+"       IF (debugMode) CALL DEBUG_CALL('GETFFIELD_START BFM Bot',myThid)",
+"# endif",
+"       CALL EXF_GETFFIELD_START( useBFMcouplerYearlyFields,",
+"     I                    'exf', 'BFM', BFMcouplerBperiod,",
+"     I                    BFMcouplerBstartdate1, BFMcouplerBstartdate2,",
+"     U                    BFMcouplerBstartTime, errCount,",
+"     I                    myThid )",
+"# ifdef ALLOW_DEBUG",
+"       IF (debugMode) CALL DEBUG_CALL('GETFFIELD_START BFM Kex',myThid)",
+"# endif",
+"       CALL EXF_GETFFIELD_START( useBFMcouplerYearlyFields,",
+"     I                    'exf', 'BFM', BFMcouplerKperiod,",
+"     I                    BFMcouplerKstartdate1, BFMcouplerKstartdate2,",
+"     U                    BFMcouplerKstartTime, errCount,",
+"     I                    myThid )",
+"      ENDIF",
+"#endif /* ALLOW_BFMCOUPLER */"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+dumpfile(outfile,LINES)
+
+MITCODE = INPUTDIR + "pkg/exf/"
+filename="exf_swapffields.F"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"ffld1(j,k,bi,bj) = 0. _d 0")
+NEW_LINES=[
+"",
+"C---+----1----+----2----+----3----+----4----+----5----+----6----+----7-|--+----|",
+"",
+"      SUBROUTINE EXF_SWAPFFIELDS_XY(",
+"     O                            ffld0,",
+"     U                            ffld1,",
+"     I                            myThid )",
+"",
+"C     ==================================================================",
+"C     SUBROUTINE exf_swapffields_xy",
+"C     ==================================================================",
+"C",
+"C     o Copy a forcing field ffld1 to ffld0 and set ffld0 to zero.",
+"C",
+"C     ==================================================================",
+"C     SUBROUTINE exf_swapffields_xy",
+"C     ==================================================================",
+"",
+"      IMPLICIT NONE",
+"",
+"C     == global variables ==",
+"#include \"EEPARAMS.h\"",
+"#include \"SIZE.h\"",
+"",
+"C     == routine arguments ==",
+"      _RS ffld0(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)",
+"      _RS ffld1(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)",
+"      INTEGER myThid",
+"",
+"C     == local variables ==",
+"      INTEGER bi, bj",
+"      INTEGER i, j",
+"",
+"C     == end of interface ==",
+"",
+"      DO bj=myByLo(myThid),myByHi(myThid)",
+"        DO bi=myBxLo(myThid),myBxHi(myThid)",
+"          DO j = 1,sNy",
+"            DO i = 1,sNx",
+"              ffld0(i,j,bi,bj) = ffld1(i,j,bi,bj)",
+"              ffld1(i,j,bi,bj) = 0.",
+"            ENDDO",
+"          ENDDO",
+"        ENDDO",
+"      ENDDO",
+"",
+"      RETURN",
+"      END"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+8)
 LINES=OUTLINES
 dumpfile(outfile,LINES)
 
