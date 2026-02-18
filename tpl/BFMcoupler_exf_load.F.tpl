@@ -67,10 +67,10 @@ CEOP
      U     O2o_botF,  O2o_botF0,  O2o_botF1,BFMcoupler_O2oBotForcFile,
      U     O3c_botF,  O3c_botF0,  O3c_botF1,BFMcoupler_O3cBotForcFile,
      U     O3h_botF,  O3h_botF0,  O3h_botF1,BFMcoupler_O3hBotForcFile,
-     U     CONC01_botF, CONC01_botF0, CONC01_botF1,
-     U     BFMcoupler_CONC01BotForcFile,
-     U     CONC02_botF, CONC02_botF0, CONC02_botF1,
-     U     BFMcoupler_CONC02BotForcFile,
+     {%- for i in range(1, n_tracers + 1) %}
+     U     CONC{{'%02d' % i}}_botF, CONC{{'%02d' % i}}_botF0, CONC{{'%02d' % i}}_botF1,
+     U     BFMcoupler_CONC{{'%02d' % i}}BotForcFile,
+     {%- endfor %}
      I     myTime, myIter, myThid )
 
       CALL BFMcouplerK_EXF_READ_XY (
@@ -322,10 +322,10 @@ C     !INTERFACE:
      U     O2o_botF,  O2o_botF0,  O2o_botF1,BFMcoupler_O2oBotForcFile,
      U     O3c_botF,  O3c_botF0,  O3c_botF1,BFMcoupler_O3cBotForcFile,
      U     O3h_botF,  O3h_botF0,  O3h_botF1,BFMcoupler_O3hBotForcFile,
-     U     CONC01_botF, CONC01_botF0, CONC01_botF1,
-     U     BFMcoupler_CONC01BotForcFile,
-     U     CONC02_botF, CONC02_botF0, CONC02_botF1,
-     U     BFMcoupler_CONC02BotForcFile,
+     {%- for i in range(1, n_tracers + 1) %}
+     U     CONC{{'%02d' % i}}_botF, CONC{{'%02d' % i}}_botF0, CONC{{'%02d' % i}}_botF1,
+     U     BFMcoupler_CONC{{'%02d' % i}}BotForcFile,
+     {%- endfor %}
      I     myTime, myIter, myThid )
 
 C     !DESCRIPTION:                          
@@ -357,8 +357,9 @@ C     !INPUT/OUTPUT PARAMETERS:
       _RL  O2o_botF(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RL  O3c_botF(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RL  O3h_botF(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RL  CONC01_botF(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RL  CONC02_botF(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
+      {%- for i in range(1, n_tracers + 1) %}
+      _RL  CONC{{'%02d' % i}}_botF(1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
+      {%- endfor %}
 
       _RS N1p_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RS N1p_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
@@ -372,10 +373,10 @@ C     !INPUT/OUTPUT PARAMETERS:
       _RS O3c_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RS O3h_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
       _RS O3h_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CONC01_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CONC01_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CONC02_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
-      _RS CONC02_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
+      {%- for i in range(1, n_tracers + 1) %}
+      _RS CONC{{'%02d' % i}}_botF0  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
+      _RS CONC{{'%02d' % i}}_botF1  (1-OLx:sNx+OLx,1-OLy:sNy+OLy,nSx,nSy)
+      {%- endfor %}
 
       CHARACTER*(MAX_LEN_FNAM) BFMcoupler_N1pBotForcFile
       CHARACTER*(MAX_LEN_FNAM) BFMcoupler_N3nBotForcFile
@@ -383,8 +384,9 @@ C     !INPUT/OUTPUT PARAMETERS:
       CHARACTER*(MAX_LEN_FNAM) BFMcoupler_O2oBotForcFile
       CHARACTER*(MAX_LEN_FNAM) BFMcoupler_O3cBotForcFile
       CHARACTER*(MAX_LEN_FNAM) BFMcoupler_O3hBotForcFile
-      CHARACTER*(MAX_LEN_FNAM) BFMcoupler_CONC01BotForcFile
-      CHARACTER*(MAX_LEN_FNAM) BFMcoupler_CONC02BotForcFile
+      {%- for i in range(1, n_tracers + 1) %}
+      CHARACTER*(MAX_LEN_FNAM) BFMcoupler_CONC{{'%02d' % i}}BotForcFile
+      {%- endfor %}
 
       _RL     myTime
       INTEGER myIter
@@ -498,20 +500,15 @@ C-    get record numbers and interpolation factor
      I                   bfmPeriod, count0, count1, year0, year1,
      I                   myTime, myIter, myThid )
       ENDIF
-      IF ( BFMcoupler_CONC01BotForcFile .NE. ' ' ) THEN
-       CALL EXF_SET_BFMcoupler( CONC01_botF, CONC01_botF0, CONC01_botF1,
-     I                   BFMcoupler_CONC01BotForcFile,'c',
+      {%- for i in range(1, n_tracers + 1) %}
+      IF ( BFMcoupler_CONC{{'%02d' % i}}BotForcFile .NE. ' ' ) THEN
+       CALL EXF_SET_BFMcoupler( CONC{{'%02d' % i}}_botF, CONC{{'%02d' % i}}_botF0, CONC{{'%02d' % i}}_botF1,
+     I                   BFMcoupler_CONC{{'%02d' % i}}BotForcFile,'c',
      I                   fac, first, changed, useYearlyFields,
      I                   bfmPeriod, count0, count1, year0, year1,
      I                   myTime, myIter, myThid )
       ENDIF
-      IF ( BFMcoupler_CONC02BotForcFile .NE. ' ' ) THEN
-       CALL EXF_SET_BFMcoupler( CONC02_botF, CONC02_botF0, CONC02_botF1,
-     I                   BFMcoupler_CONC02BotForcFile,'c',
-     I                   fac, first, changed, useYearlyFields,
-     I                   bfmPeriod, count0, count1, year0, year1,
-     I                   myTime, myIter, myThid )
-      ENDIF
+      {%- endfor %}
       
 #endif /* ALLOW_EXF */
       RETURN

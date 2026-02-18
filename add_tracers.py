@@ -17,11 +17,13 @@ TARGET_TPL = [
     Path("BFMcoupler_ini_forcing.F.tpl"),
     Path("BFMcoupler_readparams.F.tpl"),
     Path("BFMcoupler_tr_register.F.tpl"),
+    Path("BFMcoupler_exf_load.F.tpl"),
 ]
 
 TARGET_STATIC = [
     Path("BFMcoupler_init_fixed.F"),
     Path("BFMcoupler_OPTIONS.h"),
+    Path("exf_set_BFMcoupler.F"),
 ]
 
 def copy_static(dest_dir: Path):
