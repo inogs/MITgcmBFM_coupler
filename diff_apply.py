@@ -779,6 +779,86 @@ OUTLINES=insert_lines(LINES, NEW_LINES, position_line+8)
 LINES=OUTLINES
 dumpfile(outfile,LINES)
 
+MITCODE = INPUTDIR + "pkg/exf/"
+filename="EXF_PARAM.h"
+infile=MITCODE + filename
+outfile=MYCODE + filename
+LINES, position_line = strings_and_position(infile,"C                                  h/sflux, wspeed)")
+LINES, position_line = strings_and_position(infile,"      LOGICAL useOBCSYearlyFields")
+LINES, position_line = strings_and_position(infile, "      INTEGER exf_adjMonSelect")
+LINES, position_line = strings_and_position(infile, "      _RL     siobWrepCycle")
+LINES, position_line = strings_and_position(infile, "     &       useOBCSYearlyFields,")
+LINES, position_line = strings_and_position(infile, "     &       useStabilityFct_overIce, diags_opOceWeighted")
+LINES, position_line = strings_and_position(infile, "     &       siobWstartdate1,   siobWstartdate2")
+
+LINES, position_line = strings_and_position(infile,"C                                  h/sflux, wspeed)")
+NEW_LINES=[
+"C     useBFMexf          :: use BFMcoupler with EXF time management"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "      LOGICAL useOBCSYearlyFields")
+NEW_LINES=[
+"      LOGICAL useBFMcouplerYearlyFields"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "      INTEGER exf_adjMonSelect")
+NEW_LINES=[
+"",
+"      LOGICAL useBFMexf"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "      _RL     siobWrepCycle")
+NEW_LINES=[
+"",
+"      INTEGER BFMcouplerSstartdate1",
+"      INTEGER BFMcouplerSstartdate2",
+"      _RL     BFMcouplerSstartTime",
+"      _RL     BFMcouplerSperiod",
+"      _RL     BFMcouplerSrepCycle",
+"",
+"      INTEGER BFMcouplerBstartdate1",
+"      INTEGER BFMcouplerBstartdate2",
+"      _RL     BFMcouplerBstartTime",
+"      _RL     BFMcouplerBperiod",
+"      _RL     BFMcouplerBrepCycle",
+"",
+"      INTEGER BFMcouplerKstartdate1",
+"      INTEGER BFMcouplerKstartdate2",
+"      _RL     BFMcouplerKstartTime",
+"      _RL     BFMcouplerKperiod",
+"      _RL     BFMcouplerKrepCycle"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+position_line = get_position_on_strings(LINES, "     &       useOBCSYearlyFields,")
+NEW_LINES=[
+"     &       useBFMcouplerYearlyFields,"]
+OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
+LINES=OUTLINES
+
+l0= "     &       useStabilityFct_overIce, diags_opOceWeighted"
+l1 = ["     &       useStabilityFct_overIce, diags_opOceWeighted,",
+"     &       useBFMexf"]
+LINES = replace_lines(LINES,l0, l1 )
+
+l0= "     &       siobWstartdate1,   siobWstartdate2"
+l1 = ["     &       siobWstartdate1,   siobWstartdate2,",
+"     &       BFMcouplerSstartdate1,   BFMcouplerSstartdate2,",
+"     &       BFMcouplerBstartdate1,   BFMcouplerBstartdate2,",
+"     &       BFMcouplerKstartdate1,   BFMcouplerKstartdate2"]
+LINES = replace_lines(LINES,l0, l1 )
+
+l0= "     &       siobWrepCycle,     siobWperiod,     siobWstartTime"
+l1 = ["     &       siobWrepCycle,     siobWperiod,     siobWstartTime,",
+"     &       BFMcouplerSrepCycle, BFMcouplerSperiod, BFMcouplerSstartTime,",
+"     &       BFMcouplerBrepCycle, BFMcouplerBperiod, BFMcouplerBstartTime,",
+"     &       BFMcouplerKrepCycle, BFMcouplerKperiod, BFMcouplerKstartTime"]
+LINES = replace_lines(LINES,l0, l1 )
+dumpfile(outfile,LINES)
+
 
 print("-------------------------------------------------")
 print("")
