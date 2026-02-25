@@ -270,7 +270,8 @@ C '''
             # loop on diagnostic variables
             for var in self.diag_vars:
                 ofile.write('              dia' + var[0] + '(i,j,1:kBot(i,j))=d(' + str(self._diag_vars.index(var)+1) + ',1:kBot(i,j))\n')
-
+            for var in self.diag_vars_2d:
+                ofile.write('              dia' + var[0] + '(i,j,1)=d2(' + str(self.diag_vars_2d.index(var)+1) + ')\n')
             # loop on MITgcm-BFM-only diagnostic variables
             for var in self._diag_vars_MIT:
                 ofile.write('              dia' + var[1][0] + '(i,j,1:kBot(i,j))=er(1:kBot(i,j),' + str(var[0]) + ')\n')
