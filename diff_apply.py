@@ -612,7 +612,7 @@ NEW_LINES=[
 "     &    BFMcouplerBperiod,   BFMcouplerBrepCycle,",
 "     &    BFMcouplerKstartdate1,   BFMcouplerKstartdate2,",
 "     &    BFMcouplerKstartTime,",
-"     &    BFMcouplerKperiod,   BFMcouplerKrepCycle",
+"     &    BFMcouplerKperiod,   BFMcouplerKrepCycle,",
 "     &    BFMcouplerCstartdate1,   BFMcouplerCstartdate2,",
 "     &    BFMcouplerCstartTime,",
 "     &    BFMcouplerCperiod,   BFMcouplerCrepCycle",
