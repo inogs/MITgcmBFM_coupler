@@ -613,6 +613,9 @@ NEW_LINES=[
 "     &    BFMcouplerKstartdate1,   BFMcouplerKstartdate2,",
 "     &    BFMcouplerKstartTime,",
 "     &    BFMcouplerKperiod,   BFMcouplerKrepCycle",
+"     &    BFMcouplerCstartdate1,   BFMcouplerCstartdate2,",
+"     &    BFMcouplerCstartTime,",
+"     &    BFMcouplerCperiod,   BFMcouplerCrepCycle",
 "#endif"]
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line+2)
 LINES=OUTLINES
@@ -636,7 +639,10 @@ NEW_LINES=[
 "      BFMcouplerBperiod        = 0.0 _d 0",
 "      BFMcouplerKstartdate1    = 0",
 "      BFMcouplerKstartdate2    = 0",
-"      BFMcouplerKperiod        = 0.0 _d 0"]
+"      BFMcouplerKperiod        = 0.0 _d 0",
+"      BFMcouplerCstartdate1    = 0",
+"      BFMcouplerCstartdate2    = 0",
+"      BFMcouplerCperiod        = 0.0 _d 0"]
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 LINES=OUTLINES
 
@@ -644,7 +650,8 @@ position_line = get_position_on_strings(LINES, "      siobWstartTime     = UNSET
 NEW_LINES=[
 "      BFMcouplerSstartTime = UNSET_RL",
 "      BFMcouplerBstartTime = UNSET_RL",
-"      BFMcouplerKstartTime = UNSET_RL"]
+"      BFMcouplerKstartTime = UNSET_RL",
+"      BFMcouplerCstartTime = UNSET_RL"]
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 LINES=OUTLINES
 
@@ -653,7 +660,8 @@ NEW_LINES=[
 "",
 "      BFMcouplerSrepCycle = repeatPeriod",
 "      BFMcouplerBrepCycle = repeatPeriod",
-"      BFMcouplerKrepCycle = repeatPeriod"]
+"      BFMcouplerKrepCycle = repeatPeriod",
+"      BFMcouplerCrepCycle = repeatPeriod"]
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 LINES=OUTLINES
 
@@ -714,6 +722,14 @@ NEW_LINES=[
 "     I                    'exf', 'BFM', BFMcouplerKperiod,",
 "     I                    BFMcouplerKstartdate1, BFMcouplerKstartdate2,",
 "     U                    BFMcouplerKstartTime, errCount,",
+"     I                    myThid )",
+"# ifdef ALLOW_DEBUG",
+"       IF (debugMode) CALL DEBUG_CALL('GETFFIELD_START BFM Con',myThid)",
+"# endif",
+"       CALL EXF_GETFFIELD_START( useBFMcouplerYearlyFields,",
+"     I                    'exf', 'BFM', BFMcouplerCperiod,",
+"     I                    BFMcouplerCstartdate1, BFMcouplerCstartdate2,",
+"     U                    BFMcouplerCstartTime, errCount,",
 "     I                    myThid )",
 "      ENDIF",
 "#endif /* ALLOW_BFMCOUPLER */"]
@@ -829,7 +845,13 @@ NEW_LINES=[
 "      INTEGER BFMcouplerKstartdate2",
 "      _RL     BFMcouplerKstartTime",
 "      _RL     BFMcouplerKperiod",
-"      _RL     BFMcouplerKrepCycle"]
+"      _RL     BFMcouplerKrepCycle",
+"",
+"      INTEGER BFMcouplerCstartdate1",
+"      INTEGER BFMcouplerCstartdate2",
+"      _RL     BFMcouplerCstartTime",
+"      _RL     BFMcouplerCperiod",
+"      _RL     BFMcouplerCrepCycle"]
 OUTLINES=insert_lines(LINES, NEW_LINES, position_line+1)
 LINES=OUTLINES
 
@@ -848,14 +870,16 @@ l0= "     &       siobWstartdate1,   siobWstartdate2"
 l1 = ["     &       siobWstartdate1,   siobWstartdate2,",
 "     &       BFMcouplerSstartdate1,   BFMcouplerSstartdate2,",
 "     &       BFMcouplerBstartdate1,   BFMcouplerBstartdate2,",
-"     &       BFMcouplerKstartdate1,   BFMcouplerKstartdate2"]
+"     &       BFMcouplerKstartdate1,   BFMcouplerKstartdate2",
+"     &       BFMcouplerCstartdate1,   BFMcouplerCstartdate2"]
 LINES = replace_lines(LINES,l0, l1 )
 
 l0= "     &       siobWrepCycle,     siobWperiod,     siobWstartTime"
 l1 = ["     &       siobWrepCycle,     siobWperiod,     siobWstartTime,",
 "     &       BFMcouplerSrepCycle, BFMcouplerSperiod, BFMcouplerSstartTime,",
 "     &       BFMcouplerBrepCycle, BFMcouplerBperiod, BFMcouplerBstartTime,",
-"     &       BFMcouplerKrepCycle, BFMcouplerKperiod, BFMcouplerKstartTime"]
+"     &       BFMcouplerKrepCycle, BFMcouplerKperiod, BFMcouplerKstartTime",
+"     &       BFMcouplerCrepCycle, BFMcouplerCperiod, BFMcouplerCstartTime"]
 LINES = replace_lines(LINES,l0, l1 )
 dumpfile(outfile,LINES)
 
