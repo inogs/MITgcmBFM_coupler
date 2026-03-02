@@ -870,7 +870,7 @@ l0= "     &       siobWstartdate1,   siobWstartdate2"
 l1 = ["     &       siobWstartdate1,   siobWstartdate2,",
 "     &       BFMcouplerSstartdate1,   BFMcouplerSstartdate2,",
 "     &       BFMcouplerBstartdate1,   BFMcouplerBstartdate2,",
-"     &       BFMcouplerKstartdate1,   BFMcouplerKstartdate2",
+"     &       BFMcouplerKstartdate1,   BFMcouplerKstartdate2,",
 "     &       BFMcouplerCstartdate1,   BFMcouplerCstartdate2"]
 LINES = replace_lines(LINES,l0, l1 )
 
@@ -878,7 +878,7 @@ l0= "     &       siobWrepCycle,     siobWperiod,     siobWstartTime"
 l1 = ["     &       siobWrepCycle,     siobWperiod,     siobWstartTime,",
 "     &       BFMcouplerSrepCycle, BFMcouplerSperiod, BFMcouplerSstartTime,",
 "     &       BFMcouplerBrepCycle, BFMcouplerBperiod, BFMcouplerBstartTime,",
-"     &       BFMcouplerKrepCycle, BFMcouplerKperiod, BFMcouplerKstartTime",
+"     &       BFMcouplerKrepCycle, BFMcouplerKperiod, BFMcouplerKstartTime,",
 "     &       BFMcouplerCrepCycle, BFMcouplerCperiod, BFMcouplerCstartTime"]
 LINES = replace_lines(LINES,l0, l1 )
 dumpfile(outfile,LINES)
