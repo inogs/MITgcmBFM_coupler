@@ -2,7 +2,12 @@ import argparse
 
 def argument():
     parser = argparse.ArgumentParser(description = '''
-BFMcoupler configuration script
+BFMcoupler configuration script. Generates
+ - BFMcoupler_diagnostics_init.F
+ - BFMcoupler_VARDIAGlocal.h
+ - BFMcoupler_VARDIAGinitializ.h
+ - BFMcoupler_VARDIAGcopy_fromD.h
+ - BFMcoupler_VARDIAG_fill_diags.h
 
 The script parses the 'namelist.passivetrc' bfm parameter file
 in order to generate the needed BFMcoupler header files accordingly.
@@ -18,11 +23,7 @@ for the parameter files generation
                                 type = str,
                                 required = True,
                                 help = '''namelist.passivetrc''')
-    parser.add_argument(   '--type','-t',
-                                type = str,
-                                required = True,
-                                choices = ['code','namelist'],
-                                help = '''Flag to generate code or namelists''')
+
     parser.add_argument(   '--outdir','-o',
                                 type = str,
                                 required = True,
@@ -270,7 +271,8 @@ C '''
             # loop on diagnostic variables
             for var in self.diag_vars:
                 ofile.write('              dia' + var[0] + '(i,j,1:kBot(i,j))=d(' + str(self._diag_vars.index(var)+1) + ',1:kBot(i,j))\n')
-
+            for var in self.diag_vars_2d:
+                ofile.write('              dia' + var[0] + '(i,j,1)=d2(' + str(self.diag_vars_2d.index(var)+1) + ')\n')
             # loop on MITgcm-BFM-only diagnostic variables
             for var in self._diag_vars_MIT:
                 ofile.write('              dia' + var[1][0] + '(i,j,1:kBot(i,j))=er(1:kBot(i,j),' + str(var[0]) + ')\n')
@@ -301,114 +303,6 @@ C fill the diagnostic memory using DIAGNOSTICS_FILL
 
 
 
-    def write_data_ptracers(self, output_file='data.ptracers'):
-
-        header = ' &PTRACERS_PARM01\n' + ' PTRACERS_numInUse=' + str(len(self._vars)) + ',\n PTRACERS_Iter0= 0,'
-
-        with open(output_file, 'w') as ofile:
-
-            ofile.write(header)
-
-            for var in self._vars:
-
-                idx = str(self._vars.index(var))
-
-                ofile.write('# tracer ' + idx + ' - ' + var[0] + '\n')
-                ofile.write(' PTRACERS_names(' + idx + ')=\'' + var[0] + '\',\n')
-                ofile.write(' PTRACERS_long_names(' + idx + ')=\'' + var[0] + '\',\n')
-                ofile.write(' PTRACERS_units(' + idx + ')=\'' + var[1] + '\',\n')
-                
-                if 'ADVscheme' in self._vars_properties:
-                    ofile.write(' PTRACERS_advScheme(' + idx + ')=' + self._vars_properties['ADVscheme'] + ',\n')
-                if 'diffKh' in self._vars_properties:
-                    ofile.write(' PTRACERS_diffKh(' + idx + ')=' + self._vars_properties['diffKh'] + ',\n')
-                if 'diffKr' in self._vars_properties:
-                    ofile.write(' PTRACERS_diffKr(' + idx + ')=' + self._vars_properties['diffKr'] + ',\n')
-                if 'useGMRedi' in self._vars_properties:
-                    ofile.write(' PTRACERS_useGMRedi(' + idx + ')=' + self._vars_properties['useGMRedi'] + ',\n')
-                if 'useKPP' in self._vars_properties:
-                    ofile.write(' PTRACERS_useKPP(' + idx + ')=' + self._vars_properties['useKPP'] + ',\n')
-                if 'initialFile' in self._vars_properties:
-                    ofile.write(' PTRACERS_initialFile(' + idx + ')=\'' + self._vars_properties['initialFile'] + var[0] + '.bin\'' + ',\n')
-                if 'EvPrRn' in self._vars_properties:
-                    ofile.write('#PTRACERS_EvPrRn(' + idx + ')=' + self._vars_properties['EvPrRn'] + ',\n')
-
-                ofile.write('#PTRACERS_ref(1:Nr,' + idx + ')=Null,Null,Null ... ,\n')
-                ofile.write(' &END\n')
-
-
-
-    def write_data_diagnostic(self, output_file='data.diagnostic'):
-
-        default_frequency = '432000'
-        default_time_phase = '0'
-
-        header = '''# Diagnostic Package Choices
-#--------------------
-#  dumpAtLast (logical): always write output at the end of simulation (default=F)
-#  diag_mnc   (logical): write to NetCDF files (default=useMNC)
-#--for each output-stream:
-#  fileName(n) : prefix of the output file name (max 80c long) for outp.stream n
-#  frequency(n):< 0 : write snap-shot output every |frequency| seconds
-#               > 0 : write time-average output every frequency seconds
-#  timePhase(n)     : write at time = timePhase + multiple of |frequency|
-#    averagingFreq  : frequency (in s) for periodic averaging interval
-#    averagingPhase : phase     (in s) for periodic averaging interval
-#    repeatCycle    : number of averaging intervals in 1 cycle
-#  levels(:,n) : list of levels to write to file (Notes: declared as REAL)
-#                when this entry is missing, select all common levels of this list
-#  fields(:,n) : list of selected diagnostics fields (8.c) in outp.stream n
-#                (see "available_diagnostics.log" file for the full list of diags)
-#  missing_value(n) : missing value for real-type fields in output file "n"
-#  fileFlags(n)     : specific code (8c string) for output file "n"
-#--------------------
- &DIAGNOSTICS_LIST
-# diag_mnc     = .FALSE.,
-# dumpAtLast   = .TRUE.,
-'''
-
-        footer = ''' &END
-  
-# Parameter for Diagnostics of per level statistics:
-#-----------------
-# for each output-stream:
-#  stat_fname(n) : prefix of the output file name (only 8.c long) for outp.stream n
-#  stat_freq(n):< 0 : write snap-shot output every |stat_freq| seconds
-#               > 0 : write time-average output every stat_freq seconds
-#  stat_phase(n)    : write at time = stat_phase + multiple of |stat_freq|
-#  stat_region(:,n) : list of "regions" (default: 1 region only=global)
-#  stat_fields(:,n) : list of diagnostics fields (8.c) (see "available_diagnostics.log"
-#                 file for the list of all available diag. in th
-#-----------------
- &DIAG_STATIS_PARMS
- &END
-#--
-'''
-
-        with open(output_file, 'w') as ofile:
-
-            ofile.write(header)
-
-            # loop on diagnostic variables
-            for var in self._diag_vars:
-                ofile.write(' fields(1,' + str(self._diag_vars.index(var)) + ')  = \'' + var[0] + '\',\n')
-                ofile.write(' fileName(' + str(self._diag_vars.index(var)) + ')  = \'' + var[0] + '\',\n')
-                ofile.write(' frequency(' + str(self._diag_vars.index(var)) + ')  = ' + default_frequency + ',\n')
-                ofile.write(' timePhase(' + str(self._diag_vars.index(var)) + ')  = ' + default_time_phase + ',\n')
-                ofile.write('#\n')
-
-            # loop on MITgcm-BFM-only diagnostic variables
-            for var in self._diag_vars_MIT:
-                ofile.write(' fields(1,' + str(var[0]) + ')  = \'' + var[1][0] + '\',\n')
-                ofile.write(' fileName(' + str(var[0]) + ')  = \'' + var[1][0] + '\',\n')
-                ofile.write(' frequency(' + str(var[0]) + ')  = ' + default_frequency + ',\n')
-                ofile.write(' timePhase(' + str(var[0]) + ')  = ' + default_time_phase + ',\n')
-                ofile.write('#\n')
-
-            ofile.write(footer)
-
-
-
 if __name__ == '__main__':
 
     # main object istantiation
@@ -431,12 +325,8 @@ if __name__ == '__main__':
     #my_BFM_vars.flush()
 
     # output files
-    if args.type=='code':
-        my_BFM_vars.write_diagnostic_init(OUTDIR+'BFMcoupler_diagnostics_init.F')
-        my_BFM_vars.write_local(OUTDIR+'BFMcoupler_VARDIAGlocal.h')
-        my_BFM_vars.write_init(OUTDIR+'BFMcoupler_VARDIAGinitializ.h')
-        my_BFM_vars.write_copy_from_d(OUTDIR+'BFMcoupler_VARDIAGcopy_fromD.h')
-        my_BFM_vars.write_fill_diags(OUTDIR+'BFMcoupler_VARDIAG_fill_diags.h')
-    if args.type=='namelist':
-        my_BFM_vars.write_data_ptracers(OUTDIR + 'data.ptracers')
-        my_BFM_vars.write_data_diagnostic(OUTDIR + 'data.diagnostic')
+    my_BFM_vars.write_diagnostic_init(OUTDIR+'BFMcoupler_diagnostics_init.F')
+    my_BFM_vars.write_local(OUTDIR+'BFMcoupler_VARDIAGlocal.h')
+    my_BFM_vars.write_init(OUTDIR+'BFMcoupler_VARDIAGinitializ.h')
+    my_BFM_vars.write_copy_from_d(OUTDIR+'BFMcoupler_VARDIAGcopy_fromD.h')
+    my_BFM_vars.write_fill_diags(OUTDIR+'BFMcoupler_VARDIAG_fill_diags.h')
