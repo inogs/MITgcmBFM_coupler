@@ -3,16 +3,15 @@ import argparse
 def argument():
     parser = argparse.ArgumentParser(description = '''
 BFMcoupler configuration script. Generates
-BFMcoupler_diagnostics_init.F
-BFMcoupler_VARDIAGlocal.h
-BFMcoupler_VARDIAGinitializ.h
-BFMcoupler_VARDIAGcopy_fromD.h
-BFMcoupler_VARDIAG_fill_diags.h
+ - BFMcoupler_diagnostics_init.F
+ - BFMcoupler_VARDIAGlocal.h
+ - BFMcoupler_VARDIAGinitializ.h
+ - BFMcoupler_VARDIAGcopy_fromD.h
+ - BFMcoupler_VARDIAG_fill_diags.h
 
 The script parses the 'namelist.passivetrc' bfm parameter file
 in order to generate the needed BFMcoupler header files accordingly.
 
-                                     
 Main class is bfm_vars, which contains the main vars list
 and provides all the methods that need to be called
 for the parameter files generation
@@ -302,10 +301,6 @@ C fill the diagnostic memory using DIAGNOSTICS_FILL
                 ofile.write('        CALL DIAGNOSTICS_FILL(dia' + var[1][0] + ',\'' + var[1][0] + '\'\n')
                 ofile.write('     &  ,0,Nr,2,bi,bj,myThid)\n')
 
-
-
-
- 
 
 
 if __name__ == '__main__':
