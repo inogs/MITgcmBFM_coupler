@@ -446,6 +446,8 @@ c  ===== sinking velocity for 4 phyto
 
 #ifdef ALLOW_DIAGNOSTICS
 #include "BFMcoupler_VARDIAGcopy_fromD.h"
+c   forcing xEPS export as diagnostic
+           diaxEPS(i,j,1:kBot(i,j))=xESP(i,j,bi,bj)
 #endif /* ALLOW_DIAGNOSTICS */
 
              ENDIF ! endif HFacC>0
@@ -569,6 +571,8 @@ c  ===== sinking velocity for 4 phyto
 
 #ifdef ALLOW_DIAGNOSTICS
 #include "BFMcoupler_VARDIAGcopy_fromD.h"
+c   forcing xEPS export as diagnostic
+           diaxEPS(i,j,1:kBot(i,j))=xESP(i,j,bi,bj)
 #endif /* ALLOW_DIAGNOSTICS */
 
           endif ! endif HFacC>0
